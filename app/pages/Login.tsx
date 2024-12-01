@@ -1,16 +1,28 @@
-import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import color from '../shared/color';
-import AntDesign from '@expo/vector-icons/AntDesign';
-import fontSize from '../shared/font-size';
-import {
-  GoogleSignin,
-  GoogleSigninButton,
-  statusCodes,
-} from '@react-native-google-signin/google-signin';
 import { supabase } from '@/lib/supabase';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import React, { useState } from 'react';
+import {
+  Alert,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+import { useAuth } from '../context/AuthContext';
+import { NavigationProps } from '../navigation/AppNavigator';
+import color from '../shared/color';
+import fontSize from '../shared/font-size';
 
-export default function Login() {
+type Props = NavigationProps<'Login'>;
+
+export default function Login({ navigation }: Props) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const { handleLogin } = useAuth();
+
   GoogleSignin.configure({
     scopes: ['https://www.googleapis.com/auth/drive.readonly'],
     webClientId:
@@ -35,28 +47,82 @@ export default function Login() {
     }
   };
 
+  const handleLoginWithEmail = async () => {
+    if (!email || !password) {
+      Alert.alert('Erro', 'Preencha todos os campos!');
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        Alert.alert('Erro no login', error.message);
+      } else {
+        handleLogin(data.user);
+        Alert.alert('Sucesso', 'Login realizado com sucesso!');
+        navigation.navigate('Home');
+      }
+    } catch (e: any) {
+      console.error(e);
+      Alert.alert('Erro inesperado', 'Tente novamente mais tarde.');
+    }
+  };
+
   return (
-    <View>
-      <View style={styles.container}>
-        <Text
-          style={StyleSheet.flatten([styles.welcomeText, styles.welcomeTextP])}
+    <View style={styles.container}>
+      <Text style={styles.welcomeText}>Bem vindo ao TechQuest</Text>
+
+      <TextInput
+        style={styles.input}
+        placeholder="E-mail"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Senha"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+      />
+      <Pressable style={styles.button} onPress={handleLoginWithEmail}>
+        <Text style={styles.loginBtnLabel}>Login com E-mail</Text>
+      </Pressable>
+
+      <Pressable onPress={handleSignInWithGoogle}>
+        <View
+          style={{
+            padding: 10,
+            width: 'auto',
+            borderRadius: 10,
+            alignSelf: 'center',
+            backgroundColor: color.primary,
+          }}
         >
-          Olá Viajante!
-        </Text>
-        <Text style={styles.welcomeText}>Bem vindo ao TechQuest</Text>
-        <Pressable onPress={handleSignInWithGoogle}>
-          <Text style={{ textAlign: 'center', paddingTop: 20, fontSize: 25 }}>
-            Login/Cadastro
-          </Text>
-          <View style={styles.button}>
-            <AntDesign
-              name="google"
-              size={24}
-              color="white"
-              style={{ margin: 10 }}
-            />
-            <Text style={styles.loginBtnLabel}>Login com Google</Text>
-          </View>
+          <AntDesign name="google" size={24} color="white" />
+        </View>
+      </Pressable>
+      <View
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'center',
+        }}
+      >
+        <Pressable
+          style={styles.secondaryButton}
+          onPress={() => navigation.navigate('SignUp')}
+        >
+          <Text style={styles.secondaryButtonText}>Criar Conta</Text>
+        </Pressable>
+        <Pressable style={styles.secondaryButton}>
+          <Text style={styles.secondaryButtonText}>Esqueci a senha</Text>
         </Pressable>
       </View>
     </View>
@@ -65,27 +131,45 @@ export default function Login() {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 'auto',
     backgroundColor: color.white,
+    padding: 20,
+    flex: 1,
+    justifyContent: 'center',
   },
   welcomeText: {
-    padding: 15,
-    textAlign: 'center',
     fontSize: fontSize.primary,
     fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
   },
-  welcomeTextP: {
-    padding: 15,
+  input: {
+    borderWidth: 1,
+    borderColor: color.primary,
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 15,
+    fontSize: fontSize.secondary,
   },
-  loginBtnLabel: { color: color.white, fontSize: fontSize.secondary },
   button: {
     backgroundColor: color.primary,
     padding: 10,
-    margin: 20,
-    display: 'flex',
-    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 10,
+    marginBottom: 15,
+  },
+  loginBtnLabel: {
+    color: color.white,
+    fontSize: fontSize.secondary,
+    fontWeight: 'bold',
+  },
+  secondaryButton: {
+    padding: 10,
+    alignItems: 'center',
+  },
+  secondaryButtonText: {
+    color: color.primary,
+    fontSize: fontSize.secondary,
+    textDecorationLine: 'underline',
   },
 });

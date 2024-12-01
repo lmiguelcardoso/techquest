@@ -26,6 +26,7 @@
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="myapp"/>
         <data android:scheme="com.lmiguelcardoso.TechQuest"/>
+        <data android:scheme="exp+techquest"/>
       </intent-filter>
     </activity>
   </application>

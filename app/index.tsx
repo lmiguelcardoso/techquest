@@ -1,10 +1,11 @@
-import { Text, View } from 'react-native';
-import Login from './pages/Login';
+import React from 'react';
+import { AuthProvider } from './context/AuthContext';
+import AppNavigator from './navigation/AppNavigator';
 
 export default function Index() {
   return (
-    <View>
-      <Login />
-    </View>
+    <AuthProvider>
+      <AppNavigator />
+    </AuthProvider>
   );
 }
