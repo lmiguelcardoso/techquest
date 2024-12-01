@@ -15,7 +15,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.lmiguelcardoso.TechQuest"
     },
     "web": {
       "bundler": "metro",
@@ -24,6 +25,12 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.8990435403-j0368ttuhvs185e2qp5rjs3u0gsgco5i.apps.googleusercontent.com"
+        }
+      ],
       [
         "expo-splash-screen",
         {
