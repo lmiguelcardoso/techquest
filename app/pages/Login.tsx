@@ -62,7 +62,7 @@ export default function Login({ navigation }: Props) {
       if (error) {
         Alert.alert('Erro no login', error.message);
       } else {
-        handleLogin(data.user);
+        handleLogin(data.user, data.session);
         Alert.alert('Sucesso', 'Login realizado com sucesso!');
         navigation.navigate('Home');
       }
