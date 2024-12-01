@@ -1,27 +1,35 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, StyleSheet, View } from 'react-native';
 import Header from '../components/Header';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 import { userHeight } from '../shared/constants';
-import { getDungeons } from '../shared/services/DungeonService';
+import { isFirstAcess } from '../shared/services/RequestService';
+import Onboarding from './Onboarding';
 
 export default function Home() {
   const { handleLogout } = useAuth();
+  const [firstAccess, setFirstAccess] = useState<boolean>(false);
 
-  const load = async () => {
-    console.log(await getDungeons());
+  const getFirstAccess = async () => {
+    setFirstAccess(await isFirstAcess());
   };
 
   useEffect(() => {
-    load();
+    getFirstAccess();
   }, []);
 
   return (
     <View style={styles.container}>
-      <Header />
-      <Button title="Logout" onPress={handleLogout} />
-      <Navbar />
+      {firstAccess ? (
+        <Onboarding />
+      ) : (
+        <>
+          <Header />
+          <Button title="Logout" onPress={handleLogout} />
+          <Navbar />
+        </>
+      )}
     </View>
   );
 }
