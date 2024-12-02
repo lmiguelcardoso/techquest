@@ -43,16 +43,16 @@ export const createCharacter = async (user: User, raceId: number) => {
     return;
   }
 
-  // const { data, error } = await supabase
-  //   .from('characters')
-  //   .insert([
-  //     {
-  //       user_id: user.id,
-  //       level: 1,
-  //       race_id: raceId,
-  //     },
-  //   ])
-  //   .select();
+  const { data, error } = await supabase
+    .from('characters')
+    .insert([
+      {
+        user_id: user.id,
+        level: 1,
+        race_id: raceId,
+      },
+    ])
+    .select();
 
   alert(`Raça criada`);
 

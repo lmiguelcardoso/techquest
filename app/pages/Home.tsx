@@ -26,7 +26,14 @@ export default function Home() {
   const [dungeons, setDungeons] = useState<Dungeon[]>([]);
   const { character, fetchCharacter } = useCharacter();
   const { setDungeon } = useDungeon();
+  const { setCharacter } = useCharacter();
   const navigation = useNavigation<NavigationProps>();
+
+  const logout = () => {
+    setCharacter(null);
+    setDungeon(null);
+    handleLogout();
+  };
 
   const loadDungeons = async () => {
     const fetchedDungeons = await getDungeonsByRace(character!.race_id);
@@ -64,7 +71,7 @@ export default function Home() {
   return (
     <View style={styles.container}>
       <Header />
-      <Button title="Logout" onPress={handleLogout} />
+      <Button title="Logout" onPress={logout} />
       <FlatList
         data={dungeons}
         renderItem={renderDungeonItem}

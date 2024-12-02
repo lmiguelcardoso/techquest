@@ -11,7 +11,7 @@ import { useAuth } from './AuthContext';
 
 interface CharacterContextData {
   character: Character | null;
-  setCharacter: (character: Character) => void;
+  setCharacter: (character: Character | null) => void;
   fetchCharacter: () => Promise<void>;
 }
 

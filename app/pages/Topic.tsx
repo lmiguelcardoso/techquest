@@ -43,7 +43,8 @@ export default function Topic({ route }: Props) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Topics</Text>
+      <Text style={styles.title}>{dungeon?.name}</Text>
+      <Text> {dungeon?.description}</Text>
       <FlatList
         data={topics}
         keyExtractor={(item) => item.id}
