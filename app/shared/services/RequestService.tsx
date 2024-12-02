@@ -1,14 +1,20 @@
 import { supabase } from '@/lib/supabase';
 import { User } from '@supabase/supabase-js';
+import { Dungeon } from '../entities/dungeon';
 
 export const getDungeonsByRace = async (raceId: number) => {
-  let { data: dungeons, error } = await supabase
+  let { data, error } = await supabase
     .from('dungeons')
     .select('*')
     .order('min_level')
     .eq('race_id', raceId);
 
-  return dungeons;
+  if (error) {
+    console.error('Erro ao buscar as dungeons:', error);
+    return [];
+  }
+
+  return data as Dungeon[];
 };
 
 export const isFirstAcess = async () => {
