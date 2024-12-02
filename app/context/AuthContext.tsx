@@ -3,12 +3,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Session, User } from '@supabase/supabase-js';
 import { createContext, useContext, useEffect, useState } from 'react';
 import Loader from '../components/Loader';
+import { isFirstAcess } from '../shared/services/RequestService';
 
 type AuthContextProps = {
   userData: User | null;
   handleLogin: (supaBaseUser: User, session: Session) => void;
   handleLogout: () => void;
   isAuthenticated: boolean;
+  isFirstAccess: boolean;
+  setIsFirstAccess: (value: boolean) => void;
 };
 
 export const AuthContext = createContext<AuthContextProps>(
@@ -18,8 +21,14 @@ export const AuthContext = createContext<AuthContextProps>(
 export const AuthProvider = ({ children }: any) => {
   const [userData, setUserData] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isFirstAccess, setIsFirstAccess] = useState<boolean>(false);
 
   useEffect(() => {
+    const fetchFirstAccess = async () => {
+      setIsFirstAccess(await isFirstAcess());
+    };
+
+    fetchFirstAccess();
     loadingUser();
   }, []);
 
@@ -67,7 +76,9 @@ export const AuthProvider = ({ children }: any) => {
         handleLogin,
         userData,
         isAuthenticated: !!userData,
+        isFirstAccess,
         handleLogout,
+        setIsFirstAccess,
       }}
     >
       {children}

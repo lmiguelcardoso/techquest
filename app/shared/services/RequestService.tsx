@@ -62,7 +62,7 @@ export const createCharacter = async (user: User, raceId: number) => {
 };
 
 export const createFirstCharacter = async (user: User, raceId: number) => {
-  // createCharacter(user, raceId);
+  createCharacter(user, raceId);
   const data = await getDungeonsByRace(raceId);
 
   const firstDungeon = data![0].id;
@@ -81,6 +81,4 @@ export const createUserProgress = async (user: User, dungeonId: string) => {
       },
     ])
     .select();
-
-  console.log(data, error);
 };

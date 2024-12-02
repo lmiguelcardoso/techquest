@@ -52,7 +52,7 @@ const races = [
 
 export default function Onboarding() {
   const [selectedRace, setSelectedRace] = useState<string | null>(null);
-  const { userData } = useAuth();
+  const { userData, setIsFirstAccess, isFirstAccess } = useAuth();
   const handleSelectRace = (race: string) => {
     setSelectedRace(race);
   };
@@ -61,6 +61,7 @@ export default function Onboarding() {
     if (selectedRace) {
       const race = races.find((r) => r.name == selectedRace)!;
       await createFirstCharacter(userData!, race?.id);
+      setIsFirstAccess(false);
     }
   };
 
