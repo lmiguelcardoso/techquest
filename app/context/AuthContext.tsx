@@ -40,7 +40,6 @@ export const AuthProvider = ({ children }: any) => {
       const user = JSON.parse(response);
       const session = JSON.parse(sessionResponse);
 
-      // Restaure a sessão do Supabase
       await supabase.auth.setSession(session);
 
       setUserData(user);
@@ -56,10 +55,8 @@ export const AuthProvider = ({ children }: any) => {
   };
 
   const handleLogout = async () => {
-    // Faça logout no Supabase
     await supabase.auth.signOut();
 
-    // Remova os dados do AsyncStorage
     await AsyncStorage.removeItem('@loginApp:user');
     await AsyncStorage.removeItem('@loginApp:session');
 

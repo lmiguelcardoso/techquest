@@ -102,7 +102,7 @@ export default function Onboarding() {
             <Button
               title="Confirmar Seleção"
               onPress={handleConfirmSelection}
-              disabled={!selectedRace} // Botão desabilitado se nenhuma raça for selecionada
+              disabled={!selectedRace}
             />
           </View>
         </>
@@ -130,16 +130,16 @@ const styles = StyleSheet.create({
   raceContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between', // Espaçamento entre itens
+    justifyContent: 'space-between',
   },
   raceCard: {
-    width: '45%', // Ajusta dois itens por linha
+    width: '45%',
     height: 150,
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 10,
-    marginVertical: 10, // Espaçamento vertical entre as linhas
+    marginVertical: 10,
   },
   raceImage: {
     width: 60,
