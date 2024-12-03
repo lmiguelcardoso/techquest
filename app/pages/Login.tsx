@@ -6,7 +6,6 @@ import React, { useState } from 'react';
 import {
   Alert,
   Image,
-  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -14,6 +13,7 @@ import {
   View,
 } from 'react-native';
 import Background from '../components/Background';
+import ButtonPrimary from '../components/ButtonPrimary';
 import { useAuth } from '../context/AuthContext';
 import { NavigationProps } from '../navigation/AppNavigator';
 import color from '../shared/color';
@@ -111,9 +111,7 @@ export default function Login({ navigation }: Props) {
           placeholderTextColor="#FFF"
           secureTextEntry
         />
-        <Pressable style={styles.button} onPress={handleLoginWithEmail}>
-          <Text style={styles.loginBtnLabel}>Continuar</Text>
-        </Pressable>
+        <ButtonPrimary onPress={handleLogin}></ButtonPrimary>
         <View
           style={{
             flex: 1,
@@ -133,7 +131,12 @@ export default function Login({ navigation }: Props) {
               style={styles.button_social}
               onPress={handleSignInWithGoogle}
             >
-              <AntDesign name="google" size={24} color="red" />
+              <Image
+                style={{ width: 25, height: 25 }}
+                source={{
+                  uri: 'https://img.icons8.com/color/48/google-logo.png',
+                }}
+              />
             </TouchableOpacity>
             <TouchableOpacity style={styles.button_social}>
               <AntDesign name="apple1" size={24} color="black" />
@@ -176,26 +179,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     color: '#FFFFFF',
     marginBottom: 20,
-  },
-  button: {
-    backgroundColor: color.primary,
-    padding: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 10,
-    marginBottom: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 4,
-    borderColor: '#fff',
-    borderWidth: 1.5,
-  },
-  loginBtnLabel: {
-    color: color.white,
-    fontSize: fontSize.secondary,
-    fontWeight: 'bold',
   },
   background: {
     position: 'absolute',
