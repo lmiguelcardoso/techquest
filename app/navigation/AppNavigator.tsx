@@ -5,12 +5,14 @@ import {
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import Login from '../pages/(auth)/Login';
+import Main from '../pages/(auth)/Main';
 import SignUp from '../pages/(auth)/SignUp';
 import Home from '../pages/Home';
 import Onboarding from '../pages/Onboarding';
 import Topic from '../pages/Topic';
 
 export type RootStackParamList = {
+  Main: undefined;
   Login: undefined;
   SignUp: undefined;
   Home: undefined;
@@ -29,6 +31,11 @@ export default function AppNavigator() {
 
   const unAuthArea = (
     <>
+      <Stack.Screen
+        name="Main"
+        component={Main}
+        options={{ headerShown: false }}
+      />
       <Stack.Screen
         name="Login"
         component={Login}

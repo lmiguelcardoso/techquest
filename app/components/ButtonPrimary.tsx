@@ -1,19 +1,29 @@
-import React from 'react';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import React, { ReactNode } from 'react';
+import { Pressable, StyleSheet, Text, ViewStyle } from 'react-native';
 import color from '../shared/color';
 import fontSize from '../shared/font-size';
 
 type ButtonPrimaryProps = {
-  onPress: (...any: any) => any;
+  onPress: (...args: any) => void;
+  children: ReactNode;
+  style?: ViewStyle;
 };
 
-export default function ButtonPrimary({ onPress }: ButtonPrimaryProps) {
+export default function ButtonPrimary({
+  onPress,
+  children,
+  style,
+}: ButtonPrimaryProps) {
   return (
     <Pressable
-      style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
+      style={({ pressed }) => [
+        styles.button,
+        pressed && styles.buttonPressed,
+        style,
+      ]}
       onPress={onPress}
     >
-      <Text style={styles.loginBtnLabel}>Continuar</Text>
+      <Text style={styles.loginBtnLabel}>{children}</Text>
     </Pressable>
   );
 }

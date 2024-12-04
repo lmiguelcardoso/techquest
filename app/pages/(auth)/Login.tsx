@@ -1,9 +1,10 @@
 import Background from '@/app/components/Background';
 import ButtonPrimary from '@/app/components/ButtonPrimary';
+import ButtonReturn from '@/app/components/ButtonReturn';
 import { useAuth } from '@/app/context/AuthContext';
 import { NavigationProps } from '@/app/navigation/AppNavigator';
 import color from '@/app/shared/color';
-import { userHeight, userWidth } from '@/app/shared/constants';
+import { userHeight } from '@/app/shared/constants';
 import fontSize from '@/app/shared/font-size';
 import { supabase } from '@/lib/supabase';
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -77,10 +78,14 @@ export default function Login({ navigation }: Props) {
     }
   };
 
+  const handleReturn = () => {
+    navigation.navigate('Main');
+  };
   return (
     <Background>
+      <ButtonReturn onPress={handleReturn} />
       <View style={styles.welcomeContainer}>
-        <Text style={{ ...styles.welcomeText, marginTop: 20 }}>Bem vindo!</Text>
+        <Text style={{ ...styles.welcomeText }}>Bem vindo!</Text>
         <Image source={require('../../../assets/images/icon.png')} />
       </View>
       <Text
@@ -111,7 +116,7 @@ export default function Login({ navigation }: Props) {
           placeholderTextColor="#FFF"
           secureTextEntry
         />
-        <ButtonPrimary onPress={handleLogin}></ButtonPrimary>
+        <ButtonPrimary onPress={handleLoginWithEmail}>Continuar</ButtonPrimary>
         <View
           style={{
             flex: 1,
@@ -168,7 +173,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 11,
     paddingVertical: 14,
-    width: userWidth - 40,
+    // width: userWidth - 80,
     height: 53,
     backgroundColor: color.primary,
     shadowColor: '#000',
@@ -217,8 +222,8 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   button_social: {
-    width: userWidth / 3 - 35,
     height: 56,
+    width: 56,
     borderRadius: 15,
     justifyContent: 'center',
     alignItems: 'center',
