@@ -20,7 +20,7 @@ interface Topic {
 export default function Topic({ route }: Props) {
   const { dungeonId } = route.params;
   const [topics, setTopics] = useState<Topic[]>([]);
-  const { dungeon, setDungeon } = useDungeon();
+  const { dungeon } = useDungeon();
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -69,9 +69,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   topicCard: {
-    padding: 10,
     marginVertical: 10,
     backgroundColor: '#f9f9f9',
+    padding: 10,
     borderRadius: 5,
   },
   topicName: {

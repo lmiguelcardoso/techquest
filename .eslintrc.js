@@ -18,16 +18,20 @@ module.exports = {
   ],
   plugins: ['react', 'react-native', 'unused-imports'],
   rules: {
-    'no-unused-vars': 'off', // Desabilita a regra padrão do ESLint
+    'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': [
-      'warn', // Define como "warning" para variáveis não utilizadas
+      'warn',
       {
-        argsIgnorePattern: '^_', // Permite argumentos iniciados com "_"
-        varsIgnorePattern: '^_', // Permite variáveis iniciadas com "_"
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
       },
     ],
-    'unused-imports/no-unused-imports': 'warn', // Remove imports não utilizados
-    'react/react-in-jsx-scope': 'off', // Necessário para projetos com React 17+
+    'unused-imports/no-unused-imports': 'warn',
+    'react/react-in-jsx-scope': 'off',
+    'react-native/sort-styles': 'off',
+    '@typescript-eslint/no-require-imports': 'off',
+    'react-native/no-color-literals': 'warn',
+    '@typescript-eslint/no-explicit-any': 'off',
   },
   settings: {
     react: {

@@ -11,7 +11,7 @@ export default function Header() {
       </View>
 
       <Image
-        style={{ width: 75, height: 75, borderRadius: 30 }}
+        style={styles.profilePhoto}
         source={{
           uri: 'https://media.tenor.com/ni8G-dHQ7VkAAAAM/owm-midget.gif',
         }}
@@ -29,5 +29,10 @@ const styles = StyleSheet.create({
   containerGreetings: {
     display: 'flex',
     flexDirection: 'column',
+  },
+  profilePhoto: {
+    width: 75,
+    height: 75,
+    borderRadius: 30,
   },
 });

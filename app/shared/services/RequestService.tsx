@@ -3,7 +3,7 @@ import { User } from '@supabase/supabase-js';
 import { Dungeon } from '../entities/dungeon';
 
 export const getDungeonsByRace = async (raceId: number) => {
-  let { data, error } = await supabase
+  const { data, error } = await supabase
     .from('dungeons')
     .select('*')
     .order('min_level')
@@ -18,7 +18,7 @@ export const getDungeonsByRace = async (raceId: number) => {
 };
 
 export const isFirstAcess = async () => {
-  let { data: user_progress, error } = await supabase
+  const { data: user_progress } = await supabase
     .from('user_progress')
     .select('id');
 
@@ -26,7 +26,7 @@ export const isFirstAcess = async () => {
 };
 
 export const getUserById = async (userId: string) => {
-  let { data: user } = await supabase
+  const { data: user } = await supabase
     .from('users')
     .select('id')
     .eq('id', userId)
@@ -43,7 +43,7 @@ export const createCharacter = async (user: User, raceId: number) => {
     return;
   }
 
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from('characters')
     .insert([
       {
@@ -54,10 +54,15 @@ export const createCharacter = async (user: User, raceId: number) => {
     ])
     .select();
 
+  if (error) {
+    console.error('Erro ao criar o personagem:', error);
+    return [];
+  }
+
   alert(`Raça criada`);
 
   async function validateIfRaceAlreadyExists(user: User, raceId: number) {
-    let { data, error } = await supabase
+    const { data } = await supabase
       .from('characters')
       .select('id')
       .eq('user_id', user.id)
@@ -77,7 +82,7 @@ export const createFirstCharacter = async (user: User, raceId: number) => {
 };
 
 export const createUserProgress = async (user: User, dungeonId: string) => {
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from('user_progress')
     .insert([
       {
@@ -87,4 +92,9 @@ export const createUserProgress = async (user: User, dungeonId: string) => {
       },
     ])
     .select();
+
+  if (error) {
+    console.error('Erro ao criar o personagem:', error);
+    return [];
+  }
 };

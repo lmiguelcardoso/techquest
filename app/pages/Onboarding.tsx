@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import color from '../shared/color';
 import fontSize from '../shared/font-size';
 import { createFirstCharacter } from '../shared/services/RequestService';
 
@@ -52,7 +53,7 @@ const races = [
 
 export default function Onboarding() {
   const [selectedRace, setSelectedRace] = useState<string | null>(null);
-  const { userData, setIsFirstAccess, isFirstAccess } = useAuth();
+  const { userData, setIsFirstAccess } = useAuth();
   const handleSelectRace = (race: string) => {
     setSelectedRace(race);
   };
@@ -115,7 +116,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
-    backgroundColor: '#F4F4F4',
+    backgroundColor: color.white,
   },
   title: {
     textAlign: 'center',
@@ -133,28 +134,28 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   raceCard: {
-    width: '45%',
-    height: 150,
     borderRadius: 10,
+    height: 150,
     justifyContent: 'center',
+    width: '45%',
     alignItems: 'center',
     padding: 10,
     marginVertical: 10,
   },
   raceImage: {
-    width: 60,
+    borderRadius: 30,
     height: 60,
     marginBottom: 10,
-    borderRadius: 30,
+    width: 60,
   },
   raceName: {
-    fontWeight: 'bold',
-    color: '#fff',
+    color: color.white,
     fontSize: 18,
+    fontWeight: 'bold',
     marginBottom: 5,
   },
   raceRole: {
-    color: '#fff',
+    color: color.white,
     fontSize: 14,
     textAlign: 'center',
   },

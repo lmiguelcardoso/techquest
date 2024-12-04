@@ -4,7 +4,6 @@ import ButtonReturn from '@/app/components/ButtonReturn';
 import { useAuth } from '@/app/context/AuthContext';
 import { NavigationProps } from '@/app/navigation/AppNavigator';
 import color from '@/app/shared/color';
-import { userHeight } from '@/app/shared/constants';
 import fontSize from '@/app/shared/font-size';
 import { supabase } from '@/lib/supabase';
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -88,14 +87,7 @@ export default function Login({ navigation }: Props) {
         <Text style={{ ...styles.welcomeText }}>Bem vindo!</Text>
         <Image source={require('../../../assets/images/icon.png')} />
       </View>
-      <Text
-        style={{
-          ...styles.welcomeText,
-          textAlign: 'center',
-          justifyContent: 'flex-end',
-          marginBottom: 20,
-        }}
-      >
+      <Text style={{ ...styles.welcomeText, ...styles.subtitleContainer }}>
         Entre na sua conta
       </Text>
       <View style={styles.container}>
@@ -116,13 +108,10 @@ export default function Login({ navigation }: Props) {
           placeholderTextColor="#FFF"
           secureTextEntry
         />
-        <ButtonPrimary onPress={handleLoginWithEmail}>Continuar</ButtonPrimary>
-        <View
-          style={{
-            flex: 1,
-            alignItems: 'center',
-          }}
-        >
+        <ButtonPrimary onPress={handleLoginWithEmail}>
+          <Text>Continuar</Text>
+        </ButtonPrimary>
+        <View style={styles.alignContent}>
           <View style={styles.dividerContainer}>
             <View style={styles.line} />
             <Text style={styles.text}>ou continue com</Text>
@@ -137,7 +126,7 @@ export default function Login({ navigation }: Props) {
               onPress={handleSignInWithGoogle}
             >
               <Image
-                style={{ width: 25, height: 25 }}
+                style={styles.googleIcon}
                 source={{
                   uri: 'https://img.icons8.com/color/48/google-logo.png',
                 }}
@@ -166,7 +155,7 @@ const styles = StyleSheet.create({
     fontSize: fontSize.primary,
     fontWeight: 'bold',
     textAlign: 'center',
-    color: 'white',
+    color: color.white,
   },
   input: {
     flexDirection: 'row',
@@ -184,19 +173,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     color: '#FFFFFF',
     marginBottom: 20,
-  },
-  background: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    height: userHeight,
-  },
-
-  icon: {
-    width: 30,
-    height: 30,
-    resizeMode: 'contain',
   },
   dividerContainer: {
     flexDirection: 'row',
@@ -234,5 +210,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+  },
+  googleIcon: { width: 25, height: 25 },
+  alignContent: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  subtitleContainer: {
+    textAlign: 'center',
+    justifyContent: 'flex-end',
+    marginBottom: 20,
   },
 });

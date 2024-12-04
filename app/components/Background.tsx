@@ -1,8 +1,12 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { StyleSheet } from 'react-native';
 
-export default function Background({ children }: any) {
+type BackgroundProps = {
+  children: ReactNode;
+};
+
+export default function Background({ children }: BackgroundProps) {
   return (
     <LinearGradient
       colors={['#D700FF', '#83009B']}

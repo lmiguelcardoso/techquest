@@ -4,7 +4,7 @@ import color from '../shared/color';
 import fontSize from '../shared/font-size';
 
 type ButtonPrimaryProps = {
-  onPress: (...args: any) => void;
+  onPress: () => void;
   children: ReactNode;
   style?: ViewStyle;
 };
