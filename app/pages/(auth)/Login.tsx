@@ -1,3 +1,10 @@
+import Background from '@/app/components/Background';
+import ButtonPrimary from '@/app/components/ButtonPrimary';
+import { useAuth } from '@/app/context/AuthContext';
+import { NavigationProps } from '@/app/navigation/AppNavigator';
+import color from '@/app/shared/color';
+import { userHeight, userWidth } from '@/app/shared/constants';
+import fontSize from '@/app/shared/font-size';
 import { supabase } from '@/lib/supabase';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
@@ -12,13 +19,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import Background from '../components/Background';
-import ButtonPrimary from '../components/ButtonPrimary';
-import { useAuth } from '../context/AuthContext';
-import { NavigationProps } from '../navigation/AppNavigator';
-import color from '../shared/color';
-import { userHeight, userWidth } from '../shared/constants';
-import fontSize from '../shared/font-size';
 
 type Props = NavigationProps<'Login'>;
 
@@ -81,7 +81,7 @@ export default function Login({ navigation }: Props) {
     <Background>
       <View style={styles.welcomeContainer}>
         <Text style={{ ...styles.welcomeText, marginTop: 20 }}>Bem vindo!</Text>
-        <Image source={require('../../assets/images/icon.png')} />
+        <Image source={require('../../../assets/images/icon.png')} />
       </View>
       <Text
         style={{

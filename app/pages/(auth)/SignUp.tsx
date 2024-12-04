@@ -1,3 +1,6 @@
+import { NavigationProps } from '@/app/navigation/AppNavigator';
+import color from '@/app/shared/color';
+import fontSize from '@/app/shared/font-size';
 import { supabase } from '@/lib/supabase';
 import React, { useState } from 'react';
 import {
@@ -8,9 +11,6 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { NavigationProps } from '../navigation/AppNavigator';
-import color from '../shared/color';
-import fontSize from '../shared/font-size';
 
 type Props = NavigationProps<'SignUp'>;
 

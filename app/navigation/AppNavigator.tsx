@@ -4,10 +4,10 @@ import {
 } from '@react-navigation/stack';
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
+import Login from '../pages/(auth)/Login';
+import SignUp from '../pages/(auth)/SignUp';
 import Home from '../pages/Home';
-import Login from '../pages/Login';
 import Onboarding from '../pages/Onboarding';
-import SignUp from '../pages/SignUp';
 import Topic from '../pages/Topic';
 
 export type RootStackParamList = {

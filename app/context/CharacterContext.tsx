@@ -23,6 +23,7 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
   const [character, setCharacter] = useState<Character | null>(null);
   const { userData } = useAuth();
   const fetchCharacter = async () => {
+    if (!userData) return;
     try {
       const { data, error } = await supabase
         .from('characters')
