@@ -6,9 +6,7 @@ import { NavigationProps } from '@/app/navigation/AppNavigator';
 import color from '@/app/shared/color';
 import fontSize from '@/app/shared/font-size';
 import { supabase } from '@/lib/supabase';
-import AntDesign from '@expo/vector-icons/AntDesign';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { Entypo } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
   Alert,
@@ -25,31 +23,12 @@ type Props = NavigationProps<'Login'>;
 export default function Login({ navigation }: Props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const { handleLogin } = useAuth();
 
-  GoogleSignin.configure({
-    scopes: ['https://www.googleapis.com/auth/drive.readonly'],
-    webClientId:
-      '8990435403-feukvau6njeahl8s4tp5ovepjlr3plmh.apps.googleusercontent.com',
-  });
-
-  const handleSignInWithGoogle = async () => {
-    try {
-      await GoogleSignin.hasPlayServices();
-      const userInfo = await GoogleSignin.signIn();
-      if (userInfo.data?.idToken) {
-        const { data, error } = await supabase.auth.signInWithIdToken({
-          provider: 'google',
-          token: userInfo.data.idToken,
-        });
-        console.log(error, data);
-      } else {
-        throw new Error('no ID token present!');
-      }
-    } catch (e: any) {
-      console.log(e);
-    }
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   const handleLoginWithEmail = async () => {
@@ -80,14 +59,15 @@ export default function Login({ navigation }: Props) {
   const handleReturn = () => {
     navigation.navigate('Main');
   };
+
   return (
     <Background>
       <ButtonReturn onPress={handleReturn} />
       <View style={styles.welcomeContainer}>
-        <Text style={{ ...styles.welcomeText }}>Bem vindo!</Text>
+        <Text style={styles.welcomeText}>Bem vindo!</Text>
         <Image source={require('../../../assets/images/icon.png')} />
       </View>
-      <Text style={{ ...styles.welcomeText, ...styles.subtitleContainer }}>
+      <Text style={[styles.welcomeText, styles.subtitleContainer]}>
         Entre na sua conta
       </Text>
       <View style={styles.container}>
@@ -100,43 +80,29 @@ export default function Login({ navigation }: Props) {
           placeholderTextColor="#FFF"
           autoCapitalize="none"
         />
-        <TextInput
-          style={styles.input}
-          placeholder="Digite sua senha"
-          value={password}
-          onChangeText={setPassword}
-          placeholderTextColor="#FFF"
-          secureTextEntry
-        />
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.passwordInput}
+            placeholder="Digite sua senha"
+            value={password}
+            onChangeText={setPassword}
+            placeholderTextColor="#FFF"
+            secureTextEntry={!showPassword}
+          />
+          <TouchableOpacity
+            onPress={togglePasswordVisibility}
+            style={styles.eyeIconContainer}
+          >
+            <Entypo
+              name={showPassword ? 'eye-with-line' : 'eye'}
+              size={18}
+              color="#fff"
+            />
+          </TouchableOpacity>
+        </View>
         <ButtonPrimary onPress={handleLoginWithEmail}>
           <Text>Continuar</Text>
         </ButtonPrimary>
-        <View style={styles.alignContent}>
-          <View style={styles.dividerContainer}>
-            <View style={styles.line} />
-            <Text style={styles.text}>ou continue com</Text>
-            <View style={styles.line} />
-          </View>
-          <View style={styles.buttonsContainer}>
-            <TouchableOpacity style={styles.button_social}>
-              <FontAwesome name="facebook-f" size={24} color="blue" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.button_social}
-              onPress={handleSignInWithGoogle}
-            >
-              <Image
-                style={styles.googleIcon}
-                source={{
-                  uri: 'https://img.icons8.com/color/48/google-logo.png',
-                }}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button_social}>
-              <AntDesign name="apple1" size={24} color="black" />
-            </TouchableOpacity>
-          </View>
-        </View>
       </View>
     </Background>
   );
@@ -162,63 +128,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 11,
     paddingVertical: 14,
-    // width: userWidth - 80,
     height: 53,
     backgroundColor: color.primary,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 4,
     borderRadius: 10,
     color: '#FFFFFF',
     marginBottom: 20,
   },
-  dividerContainer: {
+  passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    alignContent: 'center',
+    paddingHorizontal: 11,
+    paddingVertical: 14,
+    height: 53,
+    backgroundColor: color.primary,
+    borderRadius: 10,
     marginBottom: 20,
-    width: '95%',
-    alignSelf: 'center',
   },
-  line: {
+  passwordInput: {
     flex: 1,
-    height: 1,
-    backgroundColor: '#d3d3d3',
-    marginHorizontal: 10,
-  },
-  text: {
-    fontSize: 16,
-    color: '#fff',
-  },
-  buttonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    marginTop: 10,
-  },
-  button_social: {
-    height: 56,
-    width: 56,
-    borderRadius: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f9f9f9',
-    marginHorizontal: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  googleIcon: { width: 25, height: 25 },
-  alignContent: {
-    flex: 1,
-    alignItems: 'center',
+    color: '#FFFFFF',
   },
   subtitleContainer: {
     textAlign: 'center',
-    justifyContent: 'flex-end',
     marginBottom: 20,
+  },
+  eyeIconContainer: {
+    marginLeft: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
