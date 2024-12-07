@@ -1,36 +1,48 @@
+import Background from '@/app/components/Background';
+import ButtonPrimary from '@/app/components/ButtonPrimary';
+import ButtonReturn from '@/app/components/ButtonReturn';
 import { NavigationProps } from '@/app/navigation/AppNavigator';
 import color from '@/app/shared/color';
 import fontSize from '@/app/shared/font-size';
 import { supabase } from '@/lib/supabase';
 import React, { useState } from 'react';
-import {
-  Alert,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { Alert, Image, StyleSheet, Text, TextInput, View } from 'react-native';
 
 type Props = NavigationProps<'SignUp'>;
 
 export default function SignUp({ navigation }: Props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [nickname, setNickname] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const handleSignUp = async () => {
-    if (!email || !password) {
+    if (!email || !password || !nickname) {
       Alert.alert('Erro', 'Preencha todos os campos!');
       return;
     }
 
+    if (confirmPassword !== password) {
+      Alert.alert(
+        'Erro',
+        'As senhas não coincidem. Por favor, tente novamente.'
+      );
+      return;
+    }
+
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            nickname,
+          },
+        },
       });
 
       if (error) {
+        console.log(error);
         if (error.message.includes('already registered')) {
           Alert.alert('Erro no cadastro', 'Este e-mail já está cadastrado!');
         } else {
@@ -46,64 +58,92 @@ export default function SignUp({ navigation }: Props) {
     }
   };
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Crie sua Conta</Text>
+  const handleReturn = () => {
+    navigation.navigate('Main');
+  };
 
-      <TextInput
-        style={styles.input}
-        placeholder="E-mail"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Senha"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      <Pressable style={styles.button} onPress={handleSignUp}>
-        <Text style={styles.buttonText}>Cadastrar</Text>
-      </Pressable>
-    </View>
+  return (
+    <Background>
+      <ButtonReturn onPress={handleReturn} />
+      <View style={styles.welcomeContainer}>
+        <Text style={{ ...styles.createNewAccount }}>Bem vindo!</Text>
+        <Image source={require('../../../assets/images/icon.png')} />
+      </View>
+      <Text style={{ ...styles.createNewAccount }}>
+        Cadastre uma nova conta
+      </Text>
+      <View style={styles.container}>
+        <TextInput
+          style={styles.input}
+          placeholder="Apelido"
+          value={nickname}
+          onChangeText={setNickname}
+          keyboardType="default"
+          placeholderTextColor="#FFF"
+          autoCapitalize="none"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="E-mail"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          placeholderTextColor="#FFF"
+          autoCapitalize="none"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Senha"
+          value={password}
+          onChangeText={setPassword}
+          placeholderTextColor="#FFF"
+          secureTextEntry
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Confirme sua senha"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          placeholderTextColor="#FFF"
+          secureTextEntry
+        />
+        <ButtonPrimary onPress={handleSignUp}>
+          <Text>Continuar</Text>
+        </ButtonPrimary>
+      </View>
+    </Background>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    padding: 20,
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: color.white,
-    padding: 20,
   },
-  title: {
-    fontSize: fontSize.primary,
+  welcomeContainer: {
+    alignItems: 'center',
+  },
+  createNewAccount: {
+    fontSize: fontSize.secondary,
     fontWeight: 'bold',
-    marginBottom: 20,
+    textAlign: 'center',
+    color: color.white,
   },
   input: {
-    borderWidth: 1,
-    borderColor: color.primary,
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 15,
-    width: '100%',
-    fontSize: fontSize.secondary,
-  },
-  button: {
-    backgroundColor: color.primary,
-    padding: 10,
-    borderRadius: 5,
+    flexDirection: 'row',
     alignItems: 'center',
-    width: '100%',
-  },
-  buttonText: {
-    color: color.white,
-    fontSize: fontSize.secondary,
-    fontWeight: 'bold',
+    paddingHorizontal: 11,
+    paddingVertical: 14,
+    height: 53,
+    backgroundColor: color.primary,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 4,
+    borderRadius: 10,
+    color: '#FFFFFF',
+    marginBottom: 20,
   },
 });
