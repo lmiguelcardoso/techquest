@@ -1,4 +1,4 @@
-package com.lmiguelcardoso.TechQuest
+package com.lmiguelcardoso.techquest
 
 import android.app.Application
 import android.content.res.Configuration

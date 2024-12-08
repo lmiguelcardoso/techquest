@@ -5,19 +5,19 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "com.lmiguelcardoso.techquest",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.lmiguelcardoso.TechQuest"
+      "bundleIdentifier": "com.lmiguelcardoso.techquest"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.lmiguelcardoso.TechQuest"
+      "package": "com.lmiguelcardoso.techquest"
     },
     "web": {
       "bundler": "metro",

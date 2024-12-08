@@ -6,9 +6,12 @@ import { NavigationProps } from '@/app/navigation/AppNavigator';
 import color from '@/app/shared/color';
 import fontSize from '@/app/shared/font-size';
 import { supabase } from '@/lib/supabase';
-import { AntDesign, Entypo } from '@expo/vector-icons';
+import { Entypo } from '@expo/vector-icons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { makeRedirectUri } from 'expo-auth-session';
+import * as QueryParams from 'expo-auth-session/build/QueryParams';
+import * as WebBrowser from 'expo-web-browser';
 import React, { useState } from 'react';
 import {
   Alert,
@@ -21,6 +24,7 @@ import {
 } from 'react-native';
 
 type Props = NavigationProps<'Login'>;
+const redirectTo = makeRedirectUri();
 
 export default function Login({ navigation }: Props) {
   const [email, setEmail] = useState('');
@@ -38,6 +42,16 @@ export default function Login({ navigation }: Props) {
     webClientId:
       '8990435403-feukvau6njeahl8s4tp5ovepjlr3plmh.apps.googleusercontent.com',
   });
+
+  // useEffect(() => {
+  //   const handleRedirect = (event: any) => {
+  //     const { path, queryParams } = Linking.parse(event.url);
+  //     console.log('Redirect data:', path, queryParams);
+  //   };
+
+  //   const subscription = Linking.addEventListener('url', handleRedirect);
+  //   return () => subscription.remove();
+  // }, []);
 
   const handleSignInWithGoogle = async () => {
     try {
@@ -88,6 +102,47 @@ export default function Login({ navigation }: Props) {
     } catch (e: any) {
       console.error(e);
       Alert.alert('Erro inesperado', 'Tente novamente mais tarde.');
+    }
+  };
+  const createSessionFromUrl = async (url: string) => {
+    const { params, errorCode } = QueryParams.getQueryParams(url);
+
+    if (errorCode) throw new Error(errorCode);
+    const { access_token, refresh_token } = params;
+
+    if (!access_token) return;
+
+    const { data, error } = await supabase.auth.setSession({
+      access_token,
+      refresh_token,
+    });
+    handleLogin(data.user!, data.session!);
+
+    if (error) throw error;
+    return data.session;
+  };
+
+  const performOAuth = async () => {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'github',
+      options: {
+        redirectTo,
+        skipBrowserRedirect: true,
+      },
+    });
+
+    if (error) throw error;
+
+    const res = await WebBrowser.openAuthSessionAsync(
+      data?.url ?? '',
+      redirectTo
+    );
+
+    if (res.type === 'success') {
+      const { url } = res;
+      await createSessionFromUrl(url);
+      Alert.alert('Sucesso', 'Login realizado com sucesso!');
+      navigation.navigate('Home');
     }
   };
 
@@ -163,8 +218,11 @@ export default function Login({ navigation }: Props) {
                 }}
               />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button_social}>
-              <AntDesign name="apple1" size={24} color="black" />
+            <TouchableOpacity
+              onPress={performOAuth}
+              style={styles.button_social}
+            >
+              <FontAwesome name="github" size={24} color="#000" />
             </TouchableOpacity>
           </View>
         </View>

@@ -86,9 +86,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.lmiguelcardoso.TechQuest'
+    namespace 'com.lmiguelcardoso.techquest'
     defaultConfig {
-        applicationId 'com.lmiguelcardoso.TechQuest'
+        applicationId 'com.lmiguelcardoso.techquest'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

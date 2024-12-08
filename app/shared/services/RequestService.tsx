@@ -98,3 +98,8 @@ export const createUserProgress = async (user: User, dungeonId: string) => {
     return [];
   }
 };
+
+export const getRaces = async () => {
+  const { data } = await supabase.from('races').select('*').order('race_id');
+  return data;
+};
