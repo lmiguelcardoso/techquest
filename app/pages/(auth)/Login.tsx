@@ -6,8 +6,7 @@ import { NavigationProps } from '@/app/navigation/AppNavigator';
 import color from '@/app/shared/color';
 import fontSize from '@/app/shared/font-size';
 import { supabase } from '@/lib/supabase';
-import { Entypo } from '@expo/vector-icons';
-import AntDesign from '@expo/vector-icons/AntDesign';
+import { AntDesign, Entypo } from '@expo/vector-icons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import React, { useState } from 'react';
@@ -35,7 +34,7 @@ export default function Login({ navigation }: Props) {
   };
 
   GoogleSignin.configure({
-    scopes: ['https://www.googleapis.com/auth/drive.readonly'],
+    scopes: ['email', 'profile'],
     webClientId:
       '8990435403-feukvau6njeahl8s4tp5ovepjlr3plmh.apps.googleusercontent.com',
   });
@@ -44,17 +43,26 @@ export default function Login({ navigation }: Props) {
     try {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
-      if (userInfo.data?.idToken) {
+      const idToken = (await GoogleSignin.getTokens()).idToken;
+
+      if (idToken) {
         const { data, error } = await supabase.auth.signInWithIdToken({
           provider: 'google',
-          token: userInfo.data.idToken,
+          token: idToken,
         });
-        console.log(error, data);
+
+        if (error) {
+          Alert.alert('Erro no login', error.message);
+        } else {
+          handleLogin(data.user, data.session);
+          Alert.alert('Sucesso', 'Login com Google realizado com sucesso!');
+          navigation.navigate('Home');
+        }
       } else {
-        throw new Error('no ID token present!');
+        throw new Error('Token de autenticação do Google não encontrado.');
       }
-    } catch (e: any) {
-      console.log(e);
+    } catch (error) {
+      Alert.alert('Erro inesperado ao autenticar com Google.');
     }
   };
 
@@ -85,6 +93,10 @@ export default function Login({ navigation }: Props) {
 
   const handleReturn = () => {
     navigation.navigate('Main');
+  };
+
+  const redirectToRecoverPassword = () => {
+    navigation.navigate('RecoverPassword');
   };
 
   return (
@@ -156,7 +168,9 @@ export default function Login({ navigation }: Props) {
             </TouchableOpacity>
           </View>
         </View>
-        <Text style={styles.forgetPasswordLabel}>Esqueceu sua senha?</Text>
+        <TouchableOpacity onPress={redirectToRecoverPassword}>
+          <Text style={styles.forgetPasswordLabel}>Esqueceu sua senha?</Text>
+        </TouchableOpacity>
       </View>
     </Background>
   );
