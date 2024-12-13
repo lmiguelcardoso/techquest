@@ -30,7 +30,7 @@ module.exports = {
     'react/react-in-jsx-scope': 'off',
     'react-native/sort-styles': 'off',
     '@typescript-eslint/no-require-imports': 'off',
-    'react-native/no-color-literals': 'warn',
+    'react-native/no-color-literals': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
   },
   settings: {
