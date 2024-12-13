@@ -4,6 +4,7 @@ import {
 } from '@react-navigation/stack';
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
+import ForgotPassword from '../pages/(auth)/ForgotPassword';
 import Login from '../pages/(auth)/Login';
 import Main from '../pages/(auth)/Main';
 import SignUp from '../pages/(auth)/SignUp';
@@ -14,6 +15,7 @@ import Topic from '../pages/Topic';
 export type RootStackParamList = {
   Main: undefined;
   Login: undefined;
+  RecoverPassword: undefined;
   SignUp: undefined;
   Home: undefined;
   Onboarding: undefined;
@@ -28,23 +30,16 @@ export type NavigationProps<RouteName extends keyof RootStackParamList> = {
 
 export default function AppNavigator() {
   const { isAuthenticated, isFirstAccess } = useAuth();
-
+  const screenOptions = { headerShown: false };
   const unAuthArea = (
     <>
+      <Stack.Screen name="Main" component={Main} options={screenOptions} />
+      <Stack.Screen name="Login" component={Login} options={screenOptions} />
+      <Stack.Screen name="SignUp" component={SignUp} options={screenOptions} />
       <Stack.Screen
-        name="Main"
-        component={Main}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Login"
-        component={Login}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="SignUp"
-        component={SignUp}
-        options={{ headerShown: false }}
+        name="RecoverPassword"
+        component={ForgotPassword}
+        options={screenOptions}
       />
     </>
   );
@@ -53,17 +48,13 @@ export default function AppNavigator() {
     <Stack.Screen
       name="Onboarding"
       component={Onboarding}
-      options={{ headerShown: false }}
+      options={screenOptions}
     />
   );
 
   const authArea = (
     <>
-      <Stack.Screen
-        name="Home"
-        component={Home}
-        options={{ headerShown: false }}
-      />
+      <Stack.Screen name="Home" component={Home} options={screenOptions} />
       <Stack.Screen
         name="Topic"
         component={Topic}

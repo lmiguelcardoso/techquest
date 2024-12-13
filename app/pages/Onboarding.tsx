@@ -1,102 +1,133 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Button,
   Image,
+  ImageBackground,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import Background from '../components/Background';
 import { useAuth } from '../context/AuthContext';
 import color from '../shared/color';
 import fontSize from '../shared/font-size';
-import { createFirstCharacter } from '../shared/services/RequestService';
+import {
+  createFirstCharacter,
+  getRaces,
+} from '../shared/services/RequestService';
 
-const races = [
-  {
-    id: 1,
-    name: 'Orc',
-    role: 'Backend',
-    color: '#D35400',
-    image: {
-      uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTB4bHbUuyJGSKsBwH8vzcmVtKqJhVx1vLK6w&s',
-    },
-  },
-  {
-    id: 2,
-    name: 'Elfo',
-    role: 'Frontend',
-    color: '#2980B9',
-    image: {
-      uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTB4bHbUuyJGSKsBwH8vzcmVtKqJhVx1vLK6w&s',
-    },
-  },
-  {
-    id: 3,
-    name: 'Anão',
-    role: 'DevOps',
-    color: '#27AE60',
-    image: {
-      uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTB4bHbUuyJGSKsBwH8vzcmVtKqJhVx1vLK6w&s',
-    },
-  },
-  {
-    id: 4,
-    name: 'Fada',
-    role: 'Designer',
-    color: '#FFCBDB',
-    image: {
-      uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTB4bHbUuyJGSKsBwH8vzcmVtKqJhVx1vLK6w&s',
-    },
-  },
-];
+interface Race {
+  race_id: number;
+  name: string;
+  role: string;
+  icon: string;
+  color: string;
+  'background-image': string;
+  description: {
+    title: string;
+    subtitle: string;
+    description: string;
+  };
+}
 
 export default function Onboarding() {
-  const [selectedRace, setSelectedRace] = useState<string | null>(null);
+  const [selectedRace, setSelectedRace] = useState<Race | null>(null);
   const { userData, setIsFirstAccess } = useAuth();
-  const handleSelectRace = (race: string) => {
+  const [races, setRaces] = useState<Race[] | null>(null);
+
+  const handleSelectRace = (race: Race) => {
     setSelectedRace(race);
   };
 
   const handleConfirmSelection = async () => {
-    if (selectedRace) {
-      const race = races.find((r) => r.name == selectedRace)!;
-      await createFirstCharacter(userData!, race?.id);
-      setIsFirstAccess(false);
+    try {
+      if (selectedRace && races != null) {
+        const race = races.find((r) => r.name === selectedRace.name)!;
+        await createFirstCharacter(userData!, race.race_id);
+        setIsFirstAccess(false);
+      }
+    } catch (error) {
+      console.error('Erro ao confirmar seleção:', error);
     }
   };
 
-  return (
-    <View style={styles.container}>
-      <Text style={[styles.title, { fontSize: fontSize.primary }]}>
-        Bem vindo ao TechQuest
-      </Text>
-      <Text style={[styles.subtitle, { fontSize: fontSize.secondary }]}>
-        Selecione sua raça
-      </Text>
+  const loadRaces = async () => {
+    try {
+      const fetchedRaces = await getRaces();
+      if (fetchedRaces && fetchedRaces.length > 0) {
+        console.log(fetchedRaces[0]['background-image']);
+        setRaces(fetchedRaces);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar raças:', error);
+    }
+  };
 
-      <View style={styles.raceContainer}>
-        {races.map((race) => (
-          <TouchableOpacity
-            key={race.name}
-            style={[
-              styles.raceCard,
-              { backgroundColor: race.color },
-              selectedRace === race.name && styles.selected,
-            ]}
-            onPress={() => handleSelectRace(race.name)}
-          >
-            <Image source={race.image} style={styles.raceImage} />
-            <Text style={styles.raceName}>{race.name}</Text>
-            <Text style={styles.raceRole}>{race.role}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+  const returnToRaceList = () => {
+    setSelectedRace(null);
+  };
+
+  useEffect(() => {
+    loadRaces();
+  }, []);
+
+  if (!races) {
+    return (
+      <Background>
+        <Text style={styles.title}>Carregando raças...</Text>
+      </Background>
+    );
+  }
+
+  return (
+    <>
+      {!selectedRace && (
+        <>
+          <View style={styles.alignCenter}>
+            <View style={styles.raceContainer}>
+              <Text style={styles.title}>
+                Escolha sua trilha de conhecimento
+              </Text>
+              {races.map((race) => (
+                <TouchableOpacity
+                  key={race.name}
+                  style={[
+                    styles.raceCard,
+                    { backgroundColor: race.color },
+                    selectedRace?.name === race.name && styles.selected,
+                  ]}
+                  onPress={() => handleSelectRace(race)}
+                >
+                  <Image
+                    source={{
+                      uri: race.icon,
+                    }}
+                    style={styles.raceImage}
+                  />
+                  <Text style={styles.raceName}>{race.name}</Text>
+                  <Text style={styles.raceRole}>{race.role}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </>
+      )}
 
       {selectedRace && (
-        <>
+        <ImageBackground
+          resizeMode="cover"
+          source={{ uri: selectedRace['background-image'] }}
+          style={styles.imageBackground}
+        >
+          <TouchableOpacity
+            style={styles.exitButton}
+            onPress={returnToRaceList}
+          >
+            <Text style={styles.exitButtonText}>Sair</Text>
+          </TouchableOpacity>
           <Text style={styles.selectionText}>
-            Você escolheu: {selectedRace}
+            Você escolheu: {selectedRace.name}
           </Text>
 
           <View style={styles.buttonContainer}>
@@ -106,36 +137,35 @@ export default function Onboarding() {
               disabled={!selectedRace}
             />
           </View>
-        </>
+        </ImageBackground>
       )}
-    </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  alignCenter: {
+    backgroundColor: '#580068',
+    justifyContent: 'center',
     flex: 1,
-    padding: 10,
-    backgroundColor: color.white,
+    padding: 20,
   },
   title: {
     textAlign: 'center',
-    marginBottom: 10,
+    color: color.white,
+    fontSize: fontSize.primary,
     fontWeight: 'bold',
   },
-  subtitle: {
-    textAlign: 'center',
-    marginBottom: 20,
-    color: '#555',
-  },
   raceContainer: {
+    alignContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'center',
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
   raceCard: {
     borderRadius: 10,
-    height: 150,
     justifyContent: 'center',
     width: '45%',
     alignItems: 'center',
@@ -143,16 +173,14 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   raceImage: {
-    borderRadius: 30,
-    height: 60,
-    marginBottom: 10,
-    width: 60,
+    height: 120,
+    width: 120,
+    borderRadius: 10,
   },
   raceName: {
     color: color.white,
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 5,
   },
   raceRole: {
     color: color.white,
@@ -161,13 +189,32 @@ const styles = StyleSheet.create({
   },
   selected: {
     borderWidth: 3,
-    borderColor: '#FFD700',
+    borderColor: '#FFD700', // Cor de destaque para a seleção
+  },
+  imageBackground: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  exitButton: {
+    position: 'absolute',
+    width: 50,
+    height: 50,
+    left: 10,
+    top: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  exitButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   selectionText: {
     marginTop: 20,
     textAlign: 'center',
     fontSize: fontSize.secondary,
-    color: '#333',
+    color: '#FFF',
   },
   buttonContainer: {
     marginTop: 20,
