@@ -17,12 +17,14 @@ export const getDungeonsByRace = async (raceId: number) => {
   return data as Dungeon[];
 };
 
-export const isFirstAcess = async () => {
-  const { data: user_progress } = await supabase
-    .from('user_progress')
-    .select('id');
+export const isFirstAcess = async (userId: string) => {
+  const { data: characters } = await supabase
+    .from('characters')
+    .select('*')
+    .eq('id', userId)
+    .single();
 
-  return user_progress?.length == 0;
+  return characters == null;
 };
 
 export const getUserById = async (userId: string) => {

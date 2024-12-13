@@ -21,11 +21,11 @@ export const AuthContext = createContext<AuthContextProps>(
 export const AuthProvider = ({ children }: any) => {
   const [userData, setUserData] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [isFirstAccess, setIsFirstAccess] = useState<boolean>(false);
+  const [isFirstAccess, setIsFirstAccess] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchFirstAccess = async () => {
-      setIsFirstAccess(await isFirstAcess());
+      if (userData?.id) setIsFirstAccess(await isFirstAcess(userData?.id));
     };
 
     fetchFirstAccess();
