@@ -1,15 +1,19 @@
-import AntDesign from '@expo/vector-icons/AntDesign';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Image,
+  ImageSourcePropType,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import color from '../shared/color';
 import { userWidth } from '../shared/constants';
 
 type NavItem = {
-  icon: React.ComponentType<any>;
-  name: string;
+  image: ImageSourcePropType;
   label: string;
   screenName: keyof RootStackParamList;
 };
@@ -19,21 +23,18 @@ export default function Navbar() {
 
   const navItems: NavItem[] = [
     {
-      icon: MaterialIcons,
-      name: 'inventory',
+      image: require('../../assets/images/navbar/home.png'),
+      label: 'Inicio',
+      screenName: 'Home',
+    },
+    {
+      image: require('../../assets/images/navbar/chest.png'),
       label: 'Inventário',
       screenName: 'Home',
     },
     {
-      icon: AntDesign,
-      name: 'profile',
-      label: 'Perfil',
-      screenName: 'Home',
-    },
-    {
-      icon: MaterialIcons,
-      name: 'view-agenda',
-      label: 'Missões',
+      image: require('../../assets/images/navbar/profile.png'),
+      label: 'Personagem',
       screenName: 'Home',
     },
   ];
@@ -50,7 +51,7 @@ export default function Navbar() {
           style={styles.navItem}
           onPress={() => handleNavigation(item)}
         >
-          <item.icon name={item.name} size={24} color="black" />
+          <Image source={item.image} style={styles.image} />
           <Text style={styles.navText}>{item.label}</Text>
         </TouchableOpacity>
       ))}
@@ -63,10 +64,10 @@ const styles = StyleSheet.create({
     width: userWidth,
     display: 'flex',
     flexDirection: 'row',
-    justifyContent: 'space-evenly',
+    justifyContent: 'space-around',
     position: 'absolute',
-    bottom: 45,
-    backgroundColor: color.primary,
+    bottom: 0,
+    backgroundColor: color.white,
     borderRadius: 10,
     height: 60,
     alignItems: 'center',
@@ -78,7 +79,9 @@ const styles = StyleSheet.create({
   },
   navText: {
     fontSize: 12,
-    color: 'black',
-    marginTop: 4,
+    fontWeight: '800',
+    color: color.primary,
+    marginTop: 2,
   },
+  image: { width: 25, height: 25 },
 });
