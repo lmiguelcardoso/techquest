@@ -24,13 +24,16 @@ export const AuthProvider = ({ children }: any) => {
   const [isFirstAccess, setIsFirstAccess] = useState<boolean>(true);
 
   useEffect(() => {
+    loadingUser();
+  }, []);
+
+  useEffect(() => {
     const fetchFirstAccess = async () => {
       if (userData?.id) setIsFirstAccess(await isFirstAcess(userData?.id));
     };
 
     fetchFirstAccess();
-    loadingUser();
-  }, []);
+  }, [userData]);
 
   const loadingUser = async () => {
     const response = await AsyncStorage.getItem('@loginApp:user');
