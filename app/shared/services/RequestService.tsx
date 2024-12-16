@@ -21,7 +21,7 @@ export const isFirstAcess = async (userId: string) => {
   const { data: characters } = await supabase
     .from('characters')
     .select('*')
-    .eq('id', userId)
+    .eq('user_id', userId)
     .single();
 
   return characters == null;
