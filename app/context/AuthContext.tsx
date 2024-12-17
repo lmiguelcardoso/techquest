@@ -36,6 +36,7 @@ export const AuthProvider = ({ children }: any) => {
   }, [userData]);
 
   const loadingUser = async () => {
+    setLoading(true);
     const response = await AsyncStorage.getItem('@loginApp:user');
     const sessionResponse = await AsyncStorage.getItem('@loginApp:session');
 
@@ -43,14 +44,19 @@ export const AuthProvider = ({ children }: any) => {
       const user = JSON.parse(response);
       const session = JSON.parse(sessionResponse);
 
-      await supabase.auth.setSession(session);
+      const { data, error } = await supabase.auth.setSession(session);
 
-      setUserData(user);
+      if (error || !data.session) {
+        await AsyncStorage.removeItem('@loginApp:user');
+        await AsyncStorage.removeItem('@loginApp:session');
+        setUserData(null);
+      } else {
+        setUserData(user);
+      }
     }
 
     setLoading(false);
   };
-
   const handleLogin = (supaBaseUser: User, session: Session) => {
     setUserData(supaBaseUser);
     AsyncStorage.setItem('@loginApp:user', JSON.stringify(supaBaseUser));
