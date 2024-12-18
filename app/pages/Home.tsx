@@ -1,30 +1,47 @@
+import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useEffect, useState } from 'react';
 import {
-  Button,
-  FlatList,
+  Image,
+  ImageBackground,
+  ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from 'react-native';
-import Header from '../components/Header';
+import BattleIcon from '../components/BattleIcon';
 import Navbar from '../components/Navbar';
 import { useAuth } from '../context/AuthContext';
 import { useCharacter } from '../context/CharacterContext';
 import { useDungeon } from '../context/DungeonContext';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { userHeight } from '../shared/constants';
+import color from '../shared/color';
 import { Dungeon } from '../shared/entities/dungeon';
-import { getDungeonsByRace } from '../shared/services/RequestService';
+import { TopicWithUserStatus } from '../shared/entities/topic';
+import fontSize from '../shared/font-size';
+import {
+  getTopicsByDungeonID,
+  getUserProgressById,
+} from '../shared/services/RequestService';
 
 type NavigationProps = StackNavigationProp<RootStackParamList, 'Home'>;
 
+const BATTLE_POSITIONS = [
+  { top: 450 },
+  { top: 350 },
+  { top: 255, left: 255 },
+  { top: 150 },
+  { top: 25 },
+];
+
 export default function Home() {
+  const [currentDungeon, setCurrentDungeon] = useState<Dungeon | null>(null);
+  const [topics, setTopics] = useState<TopicWithUserStatus[] | null>(null);
   const { handleLogout } = useAuth();
-  const [dungeons, setDungeons] = useState<Dungeon[]>([]);
-  const { character, fetchCharacter } = useCharacter();
+  const { userData } = useAuth();
+
+  const { character, fetchCharacter, race } = useCharacter();
   const { setDungeon } = useDungeon();
   const { setCharacter } = useCharacter();
   const navigation = useNavigation<NavigationProps>();
@@ -35,9 +52,17 @@ export default function Home() {
     handleLogout();
   };
 
-  const loadDungeons = async () => {
-    const fetchedDungeons = await getDungeonsByRace(character!.race_id);
-    setDungeons(fetchedDungeons);
+  const loadDungeon = async () => {
+    const actualDungeon = await getUserProgressById(userData!.id);
+    const dungeon = actualDungeon[0].dungeon;
+    setCurrentDungeon(dungeon);
+    await loadTopics(dungeon.id);
+  };
+
+  const loadTopics = async (dungeonId: string) => {
+    const topics = await getTopicsByDungeonID(dungeonId, userData!.id);
+    console.log(topics);
+    setTopics(topics);
   };
 
   useEffect(() => {
@@ -48,36 +73,65 @@ export default function Home() {
 
   useEffect(() => {
     if (character) {
-      loadDungeons();
+      loadDungeon();
     }
   }, [character]);
 
-  const renderDungeonItem = ({ item }: { item: Dungeon }) => (
-    <TouchableOpacity
-      style={styles.dungeonCard}
-      onPress={() => {
-        setDungeon(item);
-        navigation.navigate('Topic', {
-          dungeonId: item.id,
-        });
-      }}
-    >
-      <Text style={styles.dungeonTitle}>{item.name}</Text>
-      <Text>{item.description}</Text>
-      <Text>Minimum Level: {item.min_level}</Text>
-    </TouchableOpacity>
-  );
-
   return (
     <View style={styles.container}>
-      <Header />
-      <Button title="Logout" onPress={logout} />
-      <FlatList
-        data={dungeons}
-        renderItem={renderDungeonItem}
-        keyExtractor={(item) => item.id}
-        ListEmptyComponent={<Text>No dungeons available.</Text>}
-      />
+      {currentDungeon != null && (
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.module}>{race?.role} - Módulo 01</Text>
+            <Text style={styles.title}>{currentDungeon.name}</Text>
+          </View>
+        </View>
+      )}
+
+      <View style={styles.progressContainer}>
+        <View style={styles.characterIconContainer}>
+          <Image source={{ uri: race?.icon }} style={styles.raceIcon} />
+          <Text>{race?.name}</Text>
+        </View>
+
+        <View style={styles.dungeonDetailContainer}>
+          <Text style={styles.battleText}>Batalha 03/10</Text>
+          <View style={styles.starContainer}>
+            <Text style={styles.starText}>Estrelas</Text>
+            <FontAwesome name="star" size={24} color="yellow" />
+            <Text style={styles.starCount}>6 / 30</Text>
+          </View>
+        </View>
+      </View>
+      <ImageBackground
+        source={{
+          uri: 'https://kkjssbknhoxkehweronm.supabase.co/storage/v1/object/public/global/background.png',
+        }}
+        imageStyle={styles.backgroundImage__img}
+        style={styles.backgroundImage}
+      >
+        <ScrollView
+          style={styles.battlePath}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {topics?.map((topic, index) => (
+            <>
+              <View
+                style={[
+                  styles.battleIconContainer,
+                  BATTLE_POSITIONS[index],
+                  topic.completed && {
+                    top: BATTLE_POSITIONS[index].top - 24,
+                  },
+                ]}
+              >
+                <BattleIcon status={topic.completed ? 'completed' : 'active'} />
+              </View>
+            </>
+          ))}
+        </ScrollView>
+      </ImageBackground>
+
       <Navbar />
     </View>
   );
@@ -85,17 +139,90 @@ export default function Home() {
 
 const styles = StyleSheet.create({
   container: {
-    height: userHeight,
-    padding: 20,
+    flex: 1,
+    backgroundColor: '#4A0C5C',
   },
-  dungeonCard: {
-    padding: 10,
-    marginVertical: 5,
-    backgroundColor: '#f8f8f8',
-    borderRadius: 5,
+  header: {
+    backgroundColor: '#FFF',
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+    margin: 10,
+    padding: 5,
+    borderRadius: 8,
   },
-  dungeonTitle: {
+  module: {
+    fontSize: fontSize.text,
+    color: color.primary,
+    fontWeight: 'semibold',
+  },
+  title: {
+    fontSize: fontSize.secondary,
     fontWeight: 'bold',
-    fontSize: 16,
+    color: color.primary,
+    marginLeft: 10,
   },
+  progressContainer: {
+    backgroundColor: '#FFF',
+    padding: 15,
+    marginHorizontal: 10,
+    borderRadius: 8,
+    display: 'flex',
+    flexDirection: 'row',
+  },
+  battleText: {
+    fontSize: fontSize.primary,
+    fontWeight: 'bold',
+    color: '#4A0C5C',
+  },
+  starContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 5,
+  },
+  starText: {
+    fontSize: 16,
+    marginRight: 5,
+    color: '#4A0C5C',
+  },
+  starCount: {
+    fontSize: 16,
+    marginLeft: 5,
+    color: '#4A0C5C',
+  },
+  battlePath: {
+    flex: 1,
+    marginTop: 10,
+  },
+  scrollContent: {
+    alignItems: 'center',
+    paddingBottom: 20,
+  },
+  backgroundImage: {
+    flex: 1,
+    resizeMode: 'cover',
+    margin: 10,
+    marginBottom: 65,
+  },
+  backgroundImage__img: {
+    borderRadius: 20,
+    borderColor: 'white',
+    borderWidth: 2,
+  },
+  characterIconContainer: {
+    alignItems: 'center',
+  },
+  dungeonDetailContainer: {
+    alignItems: 'center',
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+  },
+  battleIconContainer: {
+    position: 'absolute',
+    left: '50%',
+    marginLeft: -25,
+  },
+  raceIcon: { width: 100, height: 100 },
 });

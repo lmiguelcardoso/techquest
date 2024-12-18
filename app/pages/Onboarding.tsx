@@ -13,25 +13,12 @@ import ButtonPrimary from '../components/ButtonPrimary';
 import Loader from '../components/Loader';
 import { useAuth } from '../context/AuthContext';
 import color from '../shared/color';
+import { Race } from '../shared/entities/race';
 import fontSize from '../shared/font-size';
 import {
   createFirstCharacter,
   getRaces,
 } from '../shared/services/RequestService';
-
-interface Race {
-  race_id: number;
-  name: string;
-  role: string;
-  icon: string;
-  color: string;
-  'background-image': string;
-  description: {
-    title: string;
-    subtitle: string;
-    description: string;
-  };
-}
 
 export default function Onboarding() {
   const [selectedRace, setSelectedRace] = useState<Race | null>(null);

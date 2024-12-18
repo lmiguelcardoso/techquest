@@ -1,6 +1,8 @@
 import { supabase } from '@/lib/supabase';
 import { User } from '@supabase/supabase-js';
 import { Dungeon } from '../entities/dungeon';
+import { TopicWithUserStatus } from '../entities/topic';
+import { UserProgressWithDungeon } from '../entities/user_progress';
 
 export const getDungeonsByRace = async (raceId: number) => {
   const { data, error } = await supabase
@@ -17,6 +19,69 @@ export const getDungeonsByRace = async (raceId: number) => {
   return data as Dungeon[];
 };
 
+export const getUserProgressById = async (userId: string) => {
+  const { data, error } = await supabase
+    .from('user_progress')
+    .select(
+      `
+      *,
+      dungeon: dungeon_id (id, name, description, min_level, race_id)
+    `
+    )
+    .order('created_at')
+    .eq('user_id', userId);
+
+  if (error) {
+    console.error('Erro ao buscar o progresso do usuario:', error);
+    return [];
+  }
+
+  return data as UserProgressWithDungeon[];
+};
+
+export const getTopicsByDungeonID = async (
+  dungeonId: string,
+  userId: string
+): Promise<TopicWithUserStatus[]> => {
+  // 1. Buscar todos os tópicos da dungeon
+  const { data: topics, error: topicsError } = await supabase
+    .from('topics')
+    .select('*')
+    .eq('dungeon_id', dungeonId);
+
+  if (topicsError) {
+    console.error('Erro ao buscar tópicos:', topicsError.message);
+    throw topicsError;
+  }
+
+  // 2. Buscar progresso do usuário na tabela topic_progress
+  const { data: progressData, error: progressError } = await supabase
+    .from('topic_progress')
+    .select('topic_id, completed')
+    .eq('user_id', userId);
+
+  if (progressError) {
+    console.error(
+      'Erro ao buscar progresso do usuário:',
+      progressError.message
+    );
+    throw progressError;
+  }
+
+  // 3. Criar um mapa para progresso do usuário
+  const progressMap = new Map<string, boolean>();
+  progressData?.forEach((progress) => {
+    progressMap.set(progress.topic_id, progress.completed);
+  });
+
+  // 4. Combinar os dados dos tópicos com o progresso do usuário
+  const topicsWithStatus: TopicWithUserStatus[] = topics.map((topic) => ({
+    ...topic,
+    completed: progressMap.get(topic.id) || false, // Verifica o progresso, default é false
+  }));
+
+  return topicsWithStatus;
+};
 export const isFirstAcess = async (userId: string) => {
   const { data: characters } = await supabase
     .from('characters')
