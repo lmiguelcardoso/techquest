@@ -52,6 +52,10 @@ export default function Home() {
     handleLogout();
   };
 
+  const handleNavigate = (topic_id: string) => {
+    navigation.navigate('Quiz', { topic_id: topic_id });
+  };
+
   const loadDungeon = async () => {
     const actualDungeon = await getUserProgressById(userData!.id);
     const dungeon = actualDungeon[0].dungeon;
@@ -125,7 +129,10 @@ export default function Home() {
                   },
                 ]}
               >
-                <BattleIcon status={topic.completed ? 'completed' : 'active'} />
+                <BattleIcon
+                  onPress={() => handleNavigate(topic.id)}
+                  status={topic.completed ? 'completed' : 'active'}
+                />
               </View>
             </>
           ))}

@@ -10,9 +10,10 @@ import color from '../shared/color';
 type Params = {
   status: 'active' | 'completed' | 'locked';
   stars?: number;
+  onPress?: () => void;
 };
 
-export default function BattleIcon({ status, stars = 3 }: Params) {
+export default function BattleIcon({ status, stars = 3, onPress }: Params) {
   let iconColor = '#3D3C3C';
   if (status === 'active') iconColor = '#FF0000';
   if (status === 'completed') iconColor = '#FF0000';
@@ -30,6 +31,7 @@ export default function BattleIcon({ status, stars = 3 }: Params) {
 
       <TouchableOpacity
         disabled={status == 'locked' || status == 'completed'}
+        onPress={onPress}
         style={[styles.iconContainer, { backgroundColor: iconColor }]}
       >
         {(status === 'completed' || status === 'active') && (

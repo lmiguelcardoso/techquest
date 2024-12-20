@@ -10,6 +10,7 @@ import Main from '../pages/(auth)/Main';
 import SignUp from '../pages/(auth)/SignUp';
 import Home from '../pages/Home';
 import Onboarding from '../pages/Onboarding';
+import Quiz from '../pages/Quiz';
 import Topic from '../pages/Topic';
 
 export type RootStackParamList = {
@@ -20,6 +21,7 @@ export type RootStackParamList = {
   Home: undefined;
   Onboarding: undefined;
   Topic: { dungeonId: string };
+  Quiz: { topic_id: string };
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -60,6 +62,7 @@ export default function AppNavigator() {
         component={Topic}
         options={{ headerShown: true, title: 'Topics' }}
       />
+      <Stack.Screen name="Quiz" component={Quiz} options={screenOptions} />
     </>
   );
 

@@ -170,3 +170,46 @@ export const getRaces = async () => {
   const { data } = await supabase.from('races').select('*').order('race_id');
   return data;
 };
+
+export const fetchQuestionsByTopicId = async (topicId: string) => {
+  const { data, error } = await supabase
+    .from('questions')
+    .select('*')
+    .eq('topic_id', topicId);
+
+  if (error) {
+    console.error('Erro ao buscar perguntas:', error.message);
+    throw error;
+  }
+
+  return data;
+};
+
+export const fetchQuestionsWithAnswers = async (topicId: string) => {
+  const { data: questions, error: questionError } = await supabase
+    .from('questions')
+    .select('id, text, topic_id')
+    .eq('topic_id', topicId);
+
+  if (questionError) {
+    throw questionError;
+  }
+
+  // Para cada pergunta, buscamos as respostas associadas
+  const questionsWithAnswers = await Promise.all(
+    questions.map(async (question: any) => {
+      const { data: answers, error: answersError } = await supabase
+        .from('answers')
+        .select('id, text, is_correct, question_id')
+        .eq('question_id', question.id);
+
+      if (answersError) {
+        throw answersError;
+      }
+
+      return { ...question, answers };
+    })
+  );
+
+  return questionsWithAnswers;
+};
