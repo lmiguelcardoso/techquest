@@ -3,6 +3,6 @@ export interface Item {
   name: string;
   description: string;
   type: string;
-  bonus: string;
+  bonus: any;
   icon: string;
 }

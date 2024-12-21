@@ -60,13 +60,10 @@ export default function InventoryScreen() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Buscar itens equipados com detalhes
         const { data: equipped, error: equippedError } = await supabase.from(
           'equipped_items'
-        ).select(`
-            *,
-            items ( id, name, type, bonus, icon )
-          `);
+        ).select(`*,
+          items ( id, name, type, bonus, icon )`);
 
         if (equippedError) {
           console.error('Erro ao buscar itens equipados:', equippedError);
@@ -77,10 +74,8 @@ export default function InventoryScreen() {
         const { data: inventory, error: inventoryError } = await supabase
           .from('inventory')
           .select(
-            `
-            *,
-            items ( id, name, description, bonus, icon, type )
-          `
+            `*,
+            items ( id, name, description, bonus, icon, type )`
           )
           .eq('character_id', character?.id);
 
@@ -91,7 +86,6 @@ export default function InventoryScreen() {
 
         setEquippedItems(equipped);
 
-        // Processar itens do inventário
         const inventoryItem: Item[] = (inventory || []).map((entry) => ({
           bonus: entry.items?.bonus || '',
           description: entry.items?.description || '',
@@ -101,7 +95,6 @@ export default function InventoryScreen() {
           type: entry.items?.type || '',
         }));
 
-        // Atualizar estado de itens do inventário
         setInventoryItems(inventoryItem);
       } catch (err) {
         console.error('Erro inesperado ao buscar dados:', err);
@@ -113,23 +106,19 @@ export default function InventoryScreen() {
 
   const handleEquipItem = async (itemId: string, slot: string) => {
     try {
-      // Desequipar o item atual no slot
       await supabase
         .from('equipped_items')
         .delete()
         .match({ type: slot, character_id: character?.id });
 
-      // Equipar o novo item
       const { data: newEquip, error: equipError } = await supabase
         .from('equipped_items')
         .insert({
           item_id: itemId,
           type: slot,
           character_id: character?.id,
-        }).select(`
-          *,
-          items ( id, name, type, bonus, icon )
-        `);
+        }).select(`*,
+          items ( id, name, type, bonus, icon )`);
 
       if (equipError) {
         console.error('Erro ao equipar item:', equipError);
@@ -137,12 +126,9 @@ export default function InventoryScreen() {
       }
 
       if (newEquip) {
-        // Atualizar o estado com o novo item equipado
         setEquippedItems((prev) =>
           prev.filter((item) => item.type !== slot).concat(newEquip[0])
         );
-
-        // Atualizar o inventário local
         setInventoryItems((prev) => prev.filter((item) => item.id !== itemId));
       }
     } catch (err) {
@@ -150,8 +136,52 @@ export default function InventoryScreen() {
     }
   };
 
+  const handleLongPress = async (equippedItem: EquippedItem) => {
+    try {
+      console.log('item_id', equippedItem.id);
+      console.log('character_id', character?.id);
+      const { error, data } = await supabase
+        .from('equipped_items')
+        .delete()
+        .match({ id: equippedItem.id, character_id: character?.id });
+
+      if (error) {
+        console.error('Erro ao desequipar item:', error);
+        return;
+      }
+
+      setEquippedItems((prev) =>
+        prev.filter((item) => item.id !== equippedItem.id)
+      );
+
+      setInventoryItems((prev) => [
+        ...prev,
+        {
+          id: equippedItem.items?.id || '',
+          name: equippedItem.items?.name || '',
+          description: equippedItem.items?.description || '',
+          bonus: equippedItem.items?.bonus || '',
+          icon: equippedItem.items?.icon || '',
+          type: equippedItem.type,
+        },
+      ]);
+    } catch (err) {
+      console.error('Erro ao desequipar item:', err);
+    }
+  };
+
+  useEffect(() => {
+    setInventoryItems((prevInventory) =>
+      prevInventory.filter(
+        (inventoryItem) =>
+          !equippedItems.some(
+            (equippedItem) => equippedItem.item_id === inventoryItem.id
+          )
+      )
+    );
+  }, [equippedItems]);
+
   const calculateAttributes = () => {
-    // Inicialize os atributos com valores padrão
     const baseAttributes = {
       health: 0,
       armor: 0,
@@ -175,18 +205,6 @@ export default function InventoryScreen() {
       return attributes;
     }, baseAttributes);
   };
-
-  useEffect(() => {
-    // Atualizar o inventário excluindo os itens equipados
-    setInventoryItems((prevInventory) =>
-      prevInventory.filter(
-        (inventoryItem) =>
-          !equippedItems.some(
-            (equippedItem) => equippedItem.item_id === inventoryItem.id
-          )
-      )
-    );
-  }, [equippedItems]);
 
   const attributes = calculateAttributes();
   console.log(attributes);
@@ -217,28 +235,30 @@ export default function InventoryScreen() {
             data={ItemSlots}
             numColumns={2}
             keyExtractor={(item) => item.type}
-            renderItem={({ item, index }) => (
-              <TouchableOpacity
-                key={item.type}
-                style={styles.slot}
-                onPress={() => setSelectedSlot(ItemSlots[index])}
-              >
-                <Image
-                  source={
-                    equippedItems.find(
-                      (equippedItem) => equippedItem.type === item.type
-                    )?.items?.icon
-                      ? {
-                          uri: equippedItems.find(
-                            (equippedItem) => equippedItem.type === item.type
-                          )!.items?.icon,
-                        }
-                      : item.icon
+            renderItem={({ item, index }) => {
+              const equippedItem = equippedItems.find(
+                (equipped) => equipped.type === item.type
+              );
+              return (
+                <TouchableOpacity
+                  key={item.type}
+                  style={styles.slot}
+                  onPress={() => setSelectedSlot(ItemSlots[index])}
+                  onLongPress={() =>
+                    equippedItem && handleLongPress(equippedItem)
                   }
-                  style={styles.slotImage}
-                />
-              </TouchableOpacity>
-            )}
+                >
+                  <Image
+                    source={
+                      equippedItem?.items?.icon
+                        ? { uri: equippedItem.items.icon }
+                        : item.icon
+                    }
+                    style={styles.slotImage}
+                  />
+                </TouchableOpacity>
+              );
+            }}
           />
         </View>
       </View>
@@ -270,7 +290,6 @@ export default function InventoryScreen() {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#580068', padding: 16 },
   avatarContainer: {
