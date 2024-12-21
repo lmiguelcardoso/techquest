@@ -9,6 +9,7 @@ import Login from '../pages/(auth)/Login';
 import Main from '../pages/(auth)/Main';
 import SignUp from '../pages/(auth)/SignUp';
 import Home from '../pages/Home';
+import InventoryScreen from '../pages/Inventory';
 import Onboarding from '../pages/Onboarding';
 import Quiz from '../pages/Quiz';
 import Topic from '../pages/Topic';
@@ -22,6 +23,7 @@ export type RootStackParamList = {
   Onboarding: undefined;
   Topic: { dungeonId: string };
   Quiz: { topic_id: string };
+  Inventory: { topic_id: string };
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -63,6 +65,11 @@ export default function AppNavigator() {
         options={{ headerShown: true, title: 'Topics' }}
       />
       <Stack.Screen name="Quiz" component={Quiz} options={screenOptions} />
+      <Stack.Screen
+        name="Inventory"
+        component={InventoryScreen}
+        options={screenOptions}
+      />
     </>
   );
 

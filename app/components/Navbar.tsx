@@ -30,7 +30,7 @@ export default function Navbar() {
     {
       image: require('../../assets/images/navbar/chest.png'),
       label: 'Inventário',
-      screenName: 'Home',
+      screenName: 'Inventory',
     },
     {
       image: require('../../assets/images/navbar/profile.png'),
