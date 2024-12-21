@@ -68,8 +68,6 @@ export default function InventoryScreen() {
             items ( id, name, type, bonus, icon )
           `);
 
-        console.log(equipped);
-
         if (equippedError) {
           console.error('Erro ao buscar itens equipados:', equippedError);
           return;
@@ -152,6 +150,32 @@ export default function InventoryScreen() {
     }
   };
 
+  const calculateAttributes = () => {
+    // Inicialize os atributos com valores padrão
+    const baseAttributes = {
+      health: 0,
+      armor: 0,
+      damage: 0,
+      strength: 0,
+      luck: 0,
+    };
+
+    return equippedItems.reduce((attributes, equippedItem) => {
+      if (equippedItem.items?.bonus) {
+        const bonuses = JSON.parse(equippedItem.items.bonus);
+
+        return {
+          health: attributes.health + (bonuses.health || 0),
+          armor: attributes.armor + (bonuses.armor || 0),
+          damage: attributes.damage + (bonuses.damage || 0),
+          strength: attributes.strength + (bonuses.strength || 0),
+          luck: attributes.luck + (bonuses.luck || 0),
+        };
+      }
+      return attributes;
+    }, baseAttributes);
+  };
+
   useEffect(() => {
     // Atualizar o inventário excluindo os itens equipados
     setInventoryItems((prevInventory) =>
@@ -163,6 +187,10 @@ export default function InventoryScreen() {
       )
     );
   }, [equippedItems]);
+
+  const attributes = calculateAttributes();
+  console.log(attributes);
+
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
@@ -175,11 +203,11 @@ export default function InventoryScreen() {
 
           <View style={styles.attributesContainer}>
             <Text style={styles.attributesTitle}>Atributos</Text>
-            <Text>Vida: 6</Text>
-            <Text>Armadura: 0</Text>
-            <Text>Dano: 0</Text>
-            <Text>Força: 0</Text>
-            <Text>Sorte: 0</Text>
+            <Text>Vida: {attributes.health}</Text>
+            <Text>Armadura: {attributes.armor}</Text>
+            <Text>Dano: {attributes.damage}</Text>
+            <Text>Força: {attributes.strength}</Text>
+            <Text>Sorte: {attributes.luck}</Text>
           </View>
         </View>
 
