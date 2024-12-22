@@ -1,3 +1,4 @@
+import { AntDesign } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -5,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
+  Modal,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -27,6 +29,7 @@ export default function Quiz() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isModalVisible, setModalVisible] = useState(false);
 
   const [playerLife, setPlayerLife] = useState(5);
   const [enemyLives, setEnemyLives] = useState(0);
@@ -127,6 +130,12 @@ export default function Quiz() {
       <View style={styles.lifeContainer}>
         <Text style={styles.lifeLabel}>Globin Batedor</Text>
         {renderLifeBar(enemyLives, questions.length)}
+        <TouchableOpacity
+          style={styles.exitBtn}
+          onPress={() => setModalVisible(true)}
+        >
+          <AntDesign name="close" size={30} color="black" />
+        </TouchableOpacity>
       </View>
 
       <Image
@@ -159,6 +168,41 @@ export default function Quiz() {
 
         {renderLifeBar(playerLife, 5)}
       </View>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isModalVisible}
+        onRequestClose={() => {
+          setModalVisible(!isModalVisible);
+        }}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalView}>
+            <AntDesign name="warning" size={76} color="white" />
+            <Text style={styles.modalText}>
+              Se você sair irá perder todo o progresso dessa Quest{' '}
+            </Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => setModalVisible(!isModalVisible)}
+              >
+                <Text style={styles.textStyle}>Continuar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.button, styles.buttonConfirm]}
+                onPress={() => {
+                  setModalVisible(!isModalVisible);
+                  navigation.goBack();
+                }}
+              >
+                <Text style={styles.textStyle}>Sair</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </LinearGradient>
   );
 }
@@ -242,4 +286,57 @@ const styles = StyleSheet.create({
   },
   errorText: { color: 'red', fontSize: 16 },
   enemyImage: { width: 'auto', height: 300, borderRadius: 20 },
+  exitBtn: { position: 'absolute', top: 0, right: 0 },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: color.primary,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: color.white,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    display: 'flex',
+    gap: 10,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
+    fontSize: 24,
+    color: color.white,
+  },
+  modalButtons: {
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    gap: 20,
+  },
+  button: {
+    borderWidth: 1,
+    borderColor: color.white,
+    borderRadius: 5,
+    padding: 10,
+    minWidth: '100%',
+  },
+  buttonConfirm: {
+    backgroundColor: '#7B0404',
+  },
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+    fontSize: 22,
+  },
 });
