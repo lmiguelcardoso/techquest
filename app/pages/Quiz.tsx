@@ -15,7 +15,10 @@ import {
 import { useCharacter } from '../context/CharacterContext';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import color from '../shared/color';
-import { fetchQuestionsWithAnswers } from '../shared/services/RequestService';
+import {
+  fetchQuestionsWithAnswers,
+  fetchTopic,
+} from '../shared/services/RequestService';
 
 type NavigationProps = StackNavigationProp<RootStackParamList, 'Quiz'>;
 
@@ -34,6 +37,8 @@ export default function Quiz() {
   const [playerLife, setPlayerLife] = useState(5);
   const [enemyLives, setEnemyLives] = useState(0);
   const { race } = useCharacter();
+
+  const [topic, setTopic] = useState<any | null>(null);
 
   // Fetch Questions and Answers
   useEffect(() => {
@@ -54,8 +59,20 @@ export default function Quiz() {
       }
     };
 
+    const fetchTopicData = async () => {
+      try {
+        const topicData = await fetchTopic(topic_id);
+        setTopic(topicData);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchTopicData();
     loadQuestions();
   }, [topic_id]);
+
+  useEffect(() => {}, [topic_id]);
 
   const handleAnswer = (selectedOption: string) => {
     const question = questions[currentQuestionIndex];
@@ -128,7 +145,7 @@ export default function Quiz() {
       style={{ ...styles.container }}
     >
       <View style={styles.lifeContainer}>
-        <Text style={styles.lifeLabel}>Globin Batedor</Text>
+        <Text style={styles.lifeLabel}>{topic?.enemy.name}</Text>
         {renderLifeBar(enemyLives, questions.length)}
         <TouchableOpacity
           style={styles.exitBtn}
@@ -141,7 +158,7 @@ export default function Quiz() {
       <Image
         style={styles.enemyImage}
         source={{
-          uri: 'https://kkjssbknhoxkehweronm.supabase.co/storage/v1/object/public/global/troll.png?t=2024-12-19T23%3A36%3A37.664Z',
+          uri: topic?.enemy.image,
         }}
       />
 

@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import { User } from '@supabase/supabase-js';
 import { Dungeon } from '../entities/dungeon';
-import { TopicWithUserStatus } from '../entities/topic';
+import { Topic, TopicWithUserStatus } from '../entities/topic';
 import { UserProgressWithDungeon } from '../entities/user_progress';
 
 export const getDungeonsByRace = async (raceId: number) => {
@@ -216,4 +216,19 @@ export const fetchQuestionsWithAnswers = async (topicId: string) => {
   );
 
   return questionsWithAnswers;
+};
+
+export const fetchTopic = async (topicId: string): Promise<Topic> => {
+  // Buscamos o tópico
+  const { data: topic, error: topicError } = await supabase
+    .from('topics')
+    .select('id, name, dungeon_id, description, enemy')
+    .eq('id', topicId)
+    .single();
+
+  if (topicError) {
+    throw topicError;
+  }
+
+  return topic;
 };
