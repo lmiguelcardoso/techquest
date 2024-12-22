@@ -63,7 +63,26 @@ export default function Home() {
   const loadTopics = async (dungeonId: string) => {
     const topics = await getTopicsByDungeonID(dungeonId, userData!.id);
     console.log(topics);
-    setTopics(topics);
+
+    // Define o status dos tópicos
+    let activeFound = false;
+    const updatedTopics = topics.map((topic, index) => {
+      if (topic.completed) {
+        return { ...topic, status: 'completed' };
+      } else if (!activeFound) {
+        activeFound = true;
+        return { ...topic, status: 'active' };
+      } else {
+        return { ...topic, status: 'locked' };
+      }
+    });
+
+    // Se nenhum tópico foi marcado como ativo, marque o primeiro tópico como ativo
+    if (!activeFound && updatedTopics.length > 0) {
+      updatedTopics[0].status = 'active';
+    }
+
+    setTopics(updatedTopics);
   };
 
   const handleDungeonSelect = async (dungeonId: string) => {
@@ -111,7 +130,7 @@ export default function Home() {
           <Text style={styles.module}>{race?.role} - Módulo 01</Text>
           <Text style={styles.title}>{currentDungeon?.name || race?.role}</Text>
           <TouchableOpacity
-            onPress={currentDungeon != null ? handleBackToList : handleLogout}
+            onPress={currentDungeon != null ? handleBackToList : logout}
             style={styles.headerBtn}
           >
             {currentDungeon != null ? (
@@ -182,7 +201,7 @@ export default function Home() {
                 >
                   <BattleIcon
                     onPress={() => handleNavigate(topic.id)}
-                    status={topic.completed ? 'completed' : 'active'}
+                    status={topic.status as any}
                   />
                 </View>
               ))}

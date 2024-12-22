@@ -7,4 +7,5 @@ export interface Topic {
 
 export interface TopicWithUserStatus extends Topic {
   completed: boolean;
+  status: string;
 }

@@ -154,25 +154,20 @@ export const createFirstCharacter = async (user: User, raceId: number) => {
 
   const firstDungeon = data![0].id;
 
-  await createUserProgress(user, firstDungeon);
+  await createUserProgress(user.id, firstDungeon);
 };
 
-export const createUserProgress = async (user: User, dungeonId: string) => {
-  const { error } = await supabase
+export const createUserProgress = async (userId: string, dungeonId: string) => {
+  const { data, error } = await supabase
     .from('user_progress')
-    .insert([
-      {
-        user_id: user.id,
-        dungeon_id: dungeonId,
-        progress: 0,
-      },
-    ])
-    .select();
+    .insert([{ user_id: userId, dungeon_id: dungeonId }]);
 
   if (error) {
-    console.error('Erro ao criar o personagem:', error);
-    return [];
+    console.error('Erro ao criar progresso do usuário:', error);
+    return null;
   }
+
+  return data;
 };
 
 export const getRaces = async () => {
