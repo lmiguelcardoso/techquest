@@ -22,6 +22,7 @@ import { Dungeon } from '../shared/entities/dungeon';
 import { TopicWithUserStatus } from '../shared/entities/topic';
 import fontSize from '../shared/font-size';
 import {
+  createUserProgress,
   getDungeonsByRace,
   getTopicsByDungeonID,
   getUserProgressById,
@@ -59,13 +60,6 @@ export default function Home() {
     navigation.navigate('Quiz', { topic_id: topic_id });
   };
 
-  const loadDungeon = async () => {
-    const actualDungeon = await getUserProgressById(userData!.id);
-    const dungeon = actualDungeon[0].dungeon;
-    setCurrentDungeon(dungeon);
-    await loadTopics(dungeon.id);
-  };
-
   const loadTopics = async (dungeonId: string) => {
     const topics = await getTopicsByDungeonID(dungeonId, userData!.id);
     console.log(topics);
@@ -73,7 +67,13 @@ export default function Home() {
   };
 
   const handleDungeonSelect = async (dungeonId: string) => {
-    const userProgress = await getUserProgressById(userData!.id, dungeonId);
+    let userProgress = await getUserProgressById(userData!.id, dungeonId);
+
+    if (userProgress.length === 0) {
+      // Se não houver progresso, cria um novo registro
+      await createUserProgress(userData!.id, dungeonId);
+      userProgress = await getUserProgressById(userData!.id, dungeonId);
+    }
 
     if (userProgress.length > 0) {
       const dungeon = userProgress[0].dungeon;
