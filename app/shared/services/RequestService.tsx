@@ -19,8 +19,11 @@ export const getDungeonsByRace = async (raceId: number) => {
   return data as Dungeon[];
 };
 
-export const getUserProgressById = async (userId: string) => {
-  const { data, error } = await supabase
+export const getUserProgressById = async (
+  userId: string,
+  dungeonId?: string
+) => {
+  let query = supabase
     .from('user_progress')
     .select(
       `
@@ -30,6 +33,12 @@ export const getUserProgressById = async (userId: string) => {
     )
     .order('created_at')
     .eq('user_id', userId);
+
+  if (dungeonId) {
+    query = query.eq('dungeon_id', dungeonId);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error('Erro ao buscar o progresso do usuario:', error);

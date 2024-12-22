@@ -1,4 +1,4 @@
-import { FontAwesome } from '@expo/vector-icons';
+import { AntDesign, FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useEffect, useState } from 'react';
@@ -8,6 +8,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import BattleIcon from '../components/BattleIcon';
@@ -21,6 +22,7 @@ import { Dungeon } from '../shared/entities/dungeon';
 import { TopicWithUserStatus } from '../shared/entities/topic';
 import fontSize from '../shared/font-size';
 import {
+  getDungeonsByRace,
   getTopicsByDungeonID,
   getUserProgressById,
 } from '../shared/services/RequestService';
@@ -38,9 +40,10 @@ const BATTLE_POSITIONS = [
 export default function Home() {
   const [currentDungeon, setCurrentDungeon] = useState<Dungeon | null>(null);
   const [topics, setTopics] = useState<TopicWithUserStatus[] | null>(null);
+  const [isDungeonListVisible, setDungeonListVisible] = useState(true); // Controle da visibilidade
+  const [allDungeons, setAllDungeons] = useState<Dungeon[]>([]); // Novo estado para todas as dungeons
   const { handleLogout } = useAuth();
   const { userData } = useAuth();
-
   const { character, fetchCharacter, race } = useCharacter();
   const { setDungeon } = useDungeon();
   const { setCharacter } = useCharacter();
@@ -69,6 +72,23 @@ export default function Home() {
     setTopics(topics);
   };
 
+  const handleDungeonSelect = async (dungeonId: string) => {
+    const userProgress = await getUserProgressById(userData!.id, dungeonId);
+
+    if (userProgress.length > 0) {
+      const dungeon = userProgress[0].dungeon;
+      setCurrentDungeon(dungeon);
+      await loadTopics(dungeon.id);
+    }
+
+    setDungeonListVisible(false);
+  };
+
+  const handleBackToList = () => {
+    setCurrentDungeon(null);
+    setDungeonListVisible(true);
+  };
+
   useEffect(() => {
     if (!character) {
       fetchCharacter();
@@ -76,21 +96,32 @@ export default function Home() {
   }, [character]);
 
   useEffect(() => {
-    if (character) {
-      loadDungeon();
-    }
-  }, [character]);
+    const fetchAllDungeons = async () => {
+      const dungeons = await getDungeonsByRace(character!.race_id);
+      console.log(dungeons);
+      setAllDungeons(dungeons);
+    };
+    fetchAllDungeons();
+  }, []);
 
   return (
     <View style={styles.container}>
-      {currentDungeon != null && (
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.module}>{race?.role} - Módulo 01</Text>
-            <Text style={styles.title}>{currentDungeon.name}</Text>
-          </View>
+      <View style={styles.header}>
+        <View style={styles.flex}>
+          <Text style={styles.module}>{race?.role} - Módulo 01</Text>
+          <Text style={styles.title}>{currentDungeon?.name || race?.role}</Text>
+          <TouchableOpacity
+            onPress={currentDungeon != null ? handleBackToList : handleLogout}
+            style={styles.headerBtn}
+          >
+            {currentDungeon != null ? (
+              <AntDesign name="close" size={30} color="black" />
+            ) : (
+              <MaterialIcons name="logout" size={24} color="black" />
+            )}
+          </TouchableOpacity>
         </View>
-      )}
+      </View>
 
       <View style={styles.progressContainer}>
         <View style={styles.characterIconContainer}>
@@ -107,37 +138,58 @@ export default function Home() {
           </View>
         </View>
       </View>
-      <ImageBackground
-        source={{
-          uri: 'https://kkjssbknhoxkehweronm.supabase.co/storage/v1/object/public/global/background.png',
-        }}
-        imageStyle={styles.backgroundImage__img}
-        style={styles.backgroundImage}
-      >
-        <ScrollView
-          style={styles.battlePath}
-          contentContainerStyle={styles.scrollContent}
-        >
-          {topics?.map((topic, index) => (
-            <>
-              <View
-                style={[
-                  styles.battleIconContainer,
-                  BATTLE_POSITIONS[index],
-                  topic.completed && {
-                    top: BATTLE_POSITIONS[index].top - 24,
-                  },
-                ]}
+
+      {/* DungeonList */}
+      {isDungeonListVisible ? (
+        <View style={styles.dungeonListContainer}>
+          <Text>Escolha uma Dungeon</Text>
+          <ScrollView contentContainerStyle={styles.dungeonScrollContainer}>
+            {allDungeons.map((dungeon) => (
+              <TouchableOpacity
+                key={dungeon.id}
+                onPress={() => handleDungeonSelect(dungeon.id)}
+                style={styles.dungeonItem}
               >
-                <BattleIcon
-                  onPress={() => handleNavigate(topic.id)}
-                  status={topic.completed ? 'completed' : 'active'}
-                />
-              </View>
-            </>
-          ))}
-        </ScrollView>
-      </ImageBackground>
+                <Text style={styles.dungeonName}>{dungeon.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      ) : (
+        <>
+          {/* TopicRoadMap */}
+          <ImageBackground
+            source={{
+              uri: 'https://kkjssbknhoxkehweronm.supabase.co/storage/v1/object/public/global/background.png',
+            }}
+            imageStyle={styles.backgroundImage__img}
+            style={styles.backgroundImage}
+          >
+            <ScrollView
+              style={styles.battlePath}
+              contentContainerStyle={styles.scrollContent}
+            >
+              {topics?.map((topic, index) => (
+                <View
+                  style={[
+                    styles.battleIconContainer,
+                    BATTLE_POSITIONS[index],
+                    topic.completed && {
+                      top: BATTLE_POSITIONS[index].top - 24,
+                    },
+                  ]}
+                  key={topic.id}
+                >
+                  <BattleIcon
+                    onPress={() => handleNavigate(topic.id)}
+                    status={topic.completed ? 'completed' : 'active'}
+                  />
+                </View>
+              ))}
+            </ScrollView>
+          </ImageBackground>
+        </>
+      )}
 
       <Navbar />
     </View>
@@ -232,4 +284,25 @@ const styles = StyleSheet.create({
     marginLeft: -25,
   },
   raceIcon: { width: 100, height: 100 },
+  flex: { flex: 1 },
+  headerBtn: { position: 'absolute', top: 0, right: 0 },
+  dungeonListContainer: {
+    flex: 1,
+    padding: 10,
+  },
+  dungeonScrollContainer: {
+    alignItems: 'center',
+  },
+  dungeonItem: {
+    backgroundColor: '#FFF',
+    padding: 10,
+    marginVertical: 5,
+    borderRadius: 8,
+    width: '90%',
+    alignItems: 'center',
+  },
+  dungeonName: {
+    fontSize: 18,
+    color: color.primary,
+  },
 });
