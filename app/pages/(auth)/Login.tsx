@@ -70,7 +70,6 @@ export default function Login({ navigation }: Props) {
         } else {
           handleLogin(data.user, data.session);
           Alert.alert('Sucesso', 'Login com Google realizado com sucesso!');
-          navigation.navigate('Home');
         }
       } else {
         throw new Error('Token de autenticação do Google não encontrado.');
@@ -97,7 +96,6 @@ export default function Login({ navigation }: Props) {
       } else {
         handleLogin(data.user, data.session);
         Alert.alert('Sucesso', 'Login realizado com sucesso!');
-        navigation.navigate('Home');
       }
     } catch (e: any) {
       console.error(e);
@@ -142,7 +140,6 @@ export default function Login({ navigation }: Props) {
       const { url } = res;
       await createSessionFromUrl(url);
       Alert.alert('Sucesso', 'Login realizado com sucesso!');
-      navigation.navigate('Home');
     }
   };
 
