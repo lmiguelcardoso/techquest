@@ -52,24 +52,14 @@ const ItemSlots = [
 type ItemSlot = (typeof ItemSlots)[number];
 
 export default function InventoryScreen() {
-  const [equippedItems, setEquippedItems] = useState<EquippedItem[]>([]);
   const [inventoryItems, setInventoryItems] = useState<Item[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<ItemSlot>(ItemSlots[0]);
-  const { race, character } = useCharacter();
+  const { race, character, equippedItems, equipItem, unequipItem } =
+    useCharacter();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data: equipped, error: equippedError } = await supabase.from(
-          'equipped_items'
-        ).select(`*,
-          items ( id, name, type, bonus, icon )`);
-
-        if (equippedError) {
-          console.error('Erro ao buscar itens equipados:', equippedError);
-          return;
-        }
-
         // Buscar todos os itens do inventário
         const { data: inventory, error: inventoryError } = await supabase
           .from('inventory')
@@ -83,8 +73,6 @@ export default function InventoryScreen() {
           console.error('Erro ao buscar inventário:', inventoryError);
           return;
         }
-
-        setEquippedItems(equipped);
 
         const inventoryItem: Item[] = (inventory || []).map((entry) => ({
           bonus: entry.items?.bonus || '',
@@ -106,31 +94,8 @@ export default function InventoryScreen() {
 
   const handleEquipItem = async (itemId: string, slot: string) => {
     try {
-      await supabase
-        .from('equipped_items')
-        .delete()
-        .match({ type: slot, character_id: character?.id });
-
-      const { data: newEquip, error: equipError } = await supabase
-        .from('equipped_items')
-        .insert({
-          item_id: itemId,
-          type: slot,
-          character_id: character?.id,
-        }).select(`*,
-          items ( id, name, type, bonus, icon )`);
-
-      if (equipError) {
-        console.error('Erro ao equipar item:', equipError);
-        return;
-      }
-
-      if (newEquip) {
-        setEquippedItems((prev) =>
-          prev.filter((item) => item.type !== slot).concat(newEquip[0])
-        );
-        setInventoryItems((prev) => prev.filter((item) => item.id !== itemId));
-      }
+      await equipItem(itemId, slot);
+      setInventoryItems((prev) => prev.filter((item) => item.id !== itemId));
     } catch (err) {
       console.error('Erro inesperado ao equipar item:', err);
     }
@@ -138,21 +103,7 @@ export default function InventoryScreen() {
 
   const handleLongPress = async (equippedItem: EquippedItem) => {
     try {
-      console.log('item_id', equippedItem.id);
-      console.log('character_id', character?.id);
-      const { error, data } = await supabase
-        .from('equipped_items')
-        .delete()
-        .match({ id: equippedItem.id, character_id: character?.id });
-
-      if (error) {
-        console.error('Erro ao desequipar item:', error);
-        return;
-      }
-
-      setEquippedItems((prev) =>
-        prev.filter((item) => item.id !== equippedItem.id)
-      );
+      await unequipItem(equippedItem);
 
       setInventoryItems((prev) => [
         ...prev,

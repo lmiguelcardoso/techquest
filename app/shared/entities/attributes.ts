@@ -1,4 +1,4 @@
-export interface Atributtes {
+export interface Attributes {
   health: number;
   armor: number;
   damage: number;

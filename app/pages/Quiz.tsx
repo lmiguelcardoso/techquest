@@ -36,7 +36,7 @@ export default function Quiz() {
 
   const [playerLife, setPlayerLife] = useState(5);
   const [enemyLives, setEnemyLives] = useState(0);
-  const { race } = useCharacter();
+  const { race, attributes } = useCharacter();
 
   const [topic, setTopic] = useState<any | null>(null);
 
@@ -185,6 +185,11 @@ export default function Quiz() {
 
         {renderLifeBar(playerLife, 5)}
       </View>
+
+      <Text style={styles.attributes}>
+        Attributes: {attributes.damage} {attributes.armor} {attributes.luck}{' '}
+        {attributes.armor}
+      </Text>
 
       <Modal
         animationType="slide"
@@ -355,5 +360,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     fontSize: 22,
+  },
+  attributes: {
+    fontSize: 16,
+    marginTop: 10,
+    color: color.white,
+    textAlign: 'center',
   },
 });
