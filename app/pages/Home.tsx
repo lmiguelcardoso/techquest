@@ -23,6 +23,8 @@ import { TopicWithUserStatus } from '../shared/entities/topic';
 import fontSize from '../shared/font-size';
 import {
   createUserProgress,
+  fetchStarsByDungeon,
+  fetchTotalStars,
   getDungeonsByRace,
   getTopicsByDungeonID,
   getUserProgressById,
@@ -49,6 +51,10 @@ export default function Home() {
   const { setDungeon } = useDungeon();
   const { setCharacter } = useCharacter();
   const navigation = useNavigation<NavigationProps>();
+  const [totalStars, setTotalStars] = useState(0);
+  const [dungeonStars, setDungeonStars] = useState<{ [key: string]: number }>(
+    {}
+  );
 
   const logout = () => {
     setCharacter(null);
@@ -62,7 +68,6 @@ export default function Home() {
 
   const loadTopics = async (dungeonId: string) => {
     const topics = await getTopicsByDungeonID(dungeonId, userData!.id);
-    console.log(topics);
 
     // Define o status dos tópicos
     let activeFound = false;
@@ -117,11 +122,33 @@ export default function Home() {
   useEffect(() => {
     const fetchAllDungeons = async () => {
       const dungeons = await getDungeonsByRace(character!.race_id);
-      console.log(dungeons);
       setAllDungeons(dungeons);
     };
     fetchAllDungeons();
-  }, []);
+  }, [character]);
+
+  useEffect(() => {
+    const fetchStars = async () => {
+      const data = await fetchTotalStars(userData!.id);
+
+      const totalStars = data.reduce(
+        (acc: any, progress: any) => acc + progress.stars,
+        0
+      );
+      setTotalStars(totalStars);
+
+      // Fetch stars for each dungeon
+      const starsByDungeon: { [key: string]: number } = {};
+      for (const dungeon of allDungeons) {
+        const stars = await fetchStarsByDungeon(dungeon.id, userData!.id);
+        starsByDungeon[dungeon.id] = stars;
+      }
+
+      setDungeonStars(starsByDungeon);
+    };
+
+    fetchStars();
+  }, [character, allDungeons]);
 
   return (
     <View style={styles.container}>
@@ -153,7 +180,7 @@ export default function Home() {
           <View style={styles.starContainer}>
             <Text style={styles.starText}>Estrelas</Text>
             <FontAwesome name="star" size={24} color="yellow" />
-            <Text style={styles.starCount}>6 / 30</Text>
+            <Text style={styles.starCount}>{totalStars} / 30</Text>
           </View>
         </View>
       </View>
@@ -161,15 +188,17 @@ export default function Home() {
       {/* DungeonList */}
       {isDungeonListVisible ? (
         <View style={styles.dungeonListContainer}>
-          <Text>Escolha uma Dungeon</Text>
           <ScrollView contentContainerStyle={styles.dungeonScrollContainer}>
-            {allDungeons.map((dungeon) => (
+            {allDungeons.map((dungeon, index) => (
               <TouchableOpacity
                 key={dungeon.id}
                 onPress={() => handleDungeonSelect(dungeon.id)}
                 style={styles.dungeonItem}
               >
-                <Text style={styles.dungeonName}>{dungeon.name}</Text>
+                <Text style={styles.dungeonName}>
+                  {index + 1}- {dungeon.name} - {dungeonStars[dungeon.id] || 0}{' '}
+                  estrelas
+                </Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -218,7 +247,7 @@ export default function Home() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#4A0C5C',
+    backgroundColor: '#580068',
   },
   header: {
     backgroundColor: '#FFF',
@@ -311,6 +340,11 @@ const styles = StyleSheet.create({
   },
   dungeonScrollContainer: {
     alignItems: 'center',
+    borderColor: color.white,
+    borderWidth: 2,
+    paddingVertical: 20,
+    borderRadius: 10,
+    gap: 10,
   },
   dungeonItem: {
     backgroundColor: '#FFF',
@@ -318,10 +352,10 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     borderRadius: 8,
     width: '90%',
-    alignItems: 'center',
   },
   dungeonName: {
     fontSize: 18,
+    textAlign: 'justify',
     color: color.primary,
   },
 });

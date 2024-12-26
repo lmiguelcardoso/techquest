@@ -42,7 +42,6 @@ export default function SignUp({ navigation }: Props) {
       });
 
       if (error) {
-        console.log(error);
         if (error.message.includes('already registered')) {
           Alert.alert('Erro no cadastro', 'Este e-mail já está cadastrado!');
         } else {

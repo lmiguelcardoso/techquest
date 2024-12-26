@@ -158,7 +158,6 @@ export default function InventoryScreen() {
   };
 
   const attributes = calculateAttributes();
-  console.log(attributes);
 
   return (
     <View style={styles.container}>

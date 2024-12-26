@@ -110,7 +110,6 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
       });
     });
 
-    console.log('Calculated attributes:', newAttributes);
     setAttributes(newAttributes);
   };
 

@@ -91,6 +91,7 @@ export const getTopicsByDungeonID = async (
 
   return topicsWithStatus;
 };
+
 export const isFirstAcess = async (userId: string) => {
   const { data: characters } = await supabase
     .from('characters')
@@ -231,4 +232,58 @@ export const fetchTopic = async (topicId: string): Promise<Topic> => {
   }
 
   return topic;
+};
+
+export const fetchTotalStars = async (userId: string) => {
+  const { data, error } = await supabase
+    .from('topic_progress')
+    .select('stars')
+    .eq('user_id', userId);
+
+  if (error) {
+    console.error('Erro ao buscar progresso do usuário:', error);
+    return [];
+  }
+
+  return data;
+};
+
+export const fetchStarsByDungeon = async (
+  dungeonId: string,
+  userId: string
+) => {
+  try {
+    // Buscar os tópicos relacionados à dungeon
+    const { data: topics, error: topicsError } = await supabase
+      .from('topics')
+      .select('id')
+      .eq('dungeon_id', dungeonId);
+
+    if (topicsError) {
+      console.error('Erro ao buscar tópicos da dungeon:', topicsError);
+      return 0;
+    }
+
+    const topicIds = topics.map((topic) => topic.id);
+
+    // Buscar o progresso do usuário nesses tópicos
+    const { data: progress, error: progressError } = await supabase
+      .from('topic_progress')
+      .select('stars')
+      .in('topic_id', topicIds)
+      .eq('user_id', userId);
+
+    if (progressError) {
+      console.error('Erro ao buscar progresso do usuário:', progressError);
+      return 0;
+    }
+
+    // Calcular o total de estrelas
+    const totalStars = progress.reduce((acc, item) => acc + item.stars, 0);
+
+    return totalStars;
+  } catch (error) {
+    console.error('Erro inesperado ao buscar estrelas por dungeon:', error);
+    return 0;
+  }
 };

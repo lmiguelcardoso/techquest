@@ -3,4 +3,5 @@ export interface TopicProgress {
   user_id: string;
   topic_id: string;
   completed: boolean;
+  stars: number;
 }
