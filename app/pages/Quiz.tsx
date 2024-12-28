@@ -1,4 +1,5 @@
-import { AntDesign } from '@expo/vector-icons';
+import { supabase } from '@/lib/supabase';
+import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -34,9 +35,12 @@ export default function Quiz() {
   const [error, setError] = useState<string | null>(null);
   const [isModalVisible, setModalVisible] = useState(false);
   const [isGameOverModalVisible, setIsGameOverModalVisible] = useState(false);
+  const [showRewardModal, setShowRewardModal] = useState(false);
+  const [rewardItem, setRewardItem] = useState<any>(null);
+  const [isChestOpened, setIsChestOpened] = useState(false);
 
   const [enemyLives, setEnemyLives] = useState(0);
-  const { race, attributes, playerLife, setPlayerLife, totalLife } =
+  const { race, attributes, playerLife, setPlayerLife, totalLife, character } =
     useCharacter();
 
   const [topic, setTopic] = useState<any | null>(null);
@@ -68,9 +72,40 @@ export default function Quiz() {
     loadQuestions();
   }, [topic_id]);
 
+  const getRandomItem = async () => {
+    const { data, error } = await supabase.from('items').select('*').limit(20);
+
+    if (error) {
+      console.error('Error fetching items:', error);
+      return null;
+    }
+
+    const randomIndex = Math.floor(Math.random() * data.length);
+    return data[randomIndex];
+  };
+
+  const addItemToInventory = async (itemId: string) => {
+    const { error } = await supabase.from('inventory').insert({
+      character_id: character?.id,
+      item_id: itemId,
+    });
+
+    if (error) {
+      console.error('Error adding item to inventory:', error);
+      return false;
+    }
+    return true;
+  };
+
   const handleAnswer = (isCorrect: boolean) => {
     if (isCorrect) {
-      setEnemyLives((prev) => Math.max(prev - 1, 0));
+      setEnemyLives((prev) => {
+        const newLives = Math.max(prev - 1, 0);
+        if (newLives === 0) {
+          setShowRewardModal(true);
+        }
+        return newLives;
+      });
     } else {
       setPlayerLife((prev) => {
         const newLife = Math.max(prev - 1, 0);
@@ -81,13 +116,24 @@ export default function Quiz() {
       });
     }
 
-    // Only proceed to next question if player has lives remaining
     if (playerLife > 1 && currentQuestionIndex < questions.length - 1) {
       setTimeout(() => {
         setCurrentQuestionIndex((prev) => prev + 1);
       }, 1000);
     }
   };
+
+  const handleChestClick = async () => {
+    if (!isChestOpened) {
+      const item = await getRandomItem();
+      if (item) {
+        setRewardItem(item);
+        await addItemToInventory(item.id);
+        setIsChestOpened(true);
+      }
+    }
+  };
+
   const renderLifeBar = (lives: number, totalLives: number, flex: boolean) => {
     return (
       <View style={styles.lifeBar}>
@@ -246,6 +292,50 @@ export default function Quiz() {
           </View>
         </View>
       </Modal>
+
+      <Modal visible={showRewardModal} transparent={true} animationType="slide">
+        <View style={styles.modalContainer}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>
+              {isChestOpened
+                ? 'Você ganhou:'
+                : 'Parabéns! Você completou o desafio!'}
+            </Text>
+
+            <TouchableOpacity
+              onPress={handleChestClick}
+              disabled={isChestOpened}
+            >
+              {!isChestOpened ? (
+                <MaterialCommunityIcons
+                  name="treasure-chest"
+                  size={24}
+                  color="black"
+                />
+              ) : (
+                <View style={styles.rewardContainer}>
+                  <Image
+                    source={{ uri: rewardItem?.icon }}
+                    style={styles.itemImage}
+                  />
+                  <Text style={styles.itemName}>{rewardItem?.name}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+
+            {isChestOpened && (
+              <TouchableOpacity
+                style={[styles.button, styles.buttonConfirm]}
+                onPress={() => {
+                  navigation.goBack();
+                }}
+              >
+                <Text style={styles.textStyle}>Adicionar ao inventário</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+      </Modal>
     </LinearGradient>
   );
 }
@@ -392,4 +482,18 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   flex: { flex: 1 },
+  rewardContainer: {
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  itemImage: {
+    width: 80,
+    height: 80,
+    marginBottom: 10,
+  },
+  itemName: {
+    fontSize: 18,
+    color: color.white,
+    fontWeight: 'bold',
+  },
 });
