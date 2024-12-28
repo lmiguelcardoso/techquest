@@ -22,6 +22,9 @@ interface CharacterContextData {
   setEquippedItems: React.Dispatch<React.SetStateAction<EquippedItem[]>>;
   equipItem: (itemId: string, slot: string) => Promise<void>;
   unequipItem: (equippedItem: EquippedItem) => Promise<void>;
+  playerLife: number;
+  setPlayerLife: React.Dispatch<React.SetStateAction<number>>;
+  totalLife: number;
 }
 
 const CharacterContext = createContext<CharacterContextData | undefined>(
@@ -39,6 +42,7 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     strength: 0,
     luck: 0,
   });
+  const [playerLife, setPlayerLife] = useState(5);
   const { userData } = useAuth();
 
   const fetchCharacter = async () => {
@@ -83,6 +87,7 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
+    console.log('Fetched equipped items:', data);
     setEquippedItems(data);
     calculateAttributes(data);
   };
@@ -102,6 +107,7 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     };
 
     items.forEach((item) => {
+      console.log('Processing item:', item);
       const bonuses = JSON.parse(item.items?.bonus) as Attributes;
       Object.keys(bonuses).forEach((key) => {
         newAttributes[key as keyof Attributes] += Number(
@@ -110,6 +116,7 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
       });
     });
 
+    console.log('Calculated attributes:', newAttributes);
     setAttributes(newAttributes);
   };
 
@@ -171,6 +178,12 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [character]);
 
+  useEffect(() => {
+    setPlayerLife(5 + attributes.health);
+  }, [attributes]);
+
+  const totalLife = 5 + attributes.health; // Base life + health attribute
+
   return (
     <CharacterContext.Provider
       value={{
@@ -183,6 +196,9 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
         setEquippedItems,
         equipItem,
         unequipItem,
+        playerLife,
+        setPlayerLife,
+        totalLife,
       }}
     >
       {children}

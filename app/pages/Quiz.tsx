@@ -34,9 +34,9 @@ export default function Quiz() {
   const [error, setError] = useState<string | null>(null);
   const [isModalVisible, setModalVisible] = useState(false);
 
-  const [playerLife, setPlayerLife] = useState(5);
   const [enemyLives, setEnemyLives] = useState(0);
-  const { race, attributes } = useCharacter();
+  const { race, attributes, playerLife, setPlayerLife, totalLife } =
+    useCharacter();
 
   const [topic, setTopic] = useState<any | null>(null);
 
@@ -44,46 +44,37 @@ export default function Quiz() {
   useEffect(() => {
     const loadQuestions = async () => {
       try {
+        const topicData = await fetchTopic(topic_id);
+        setTopic(topicData);
+
         const data = await fetchQuestionsWithAnswers(topic_id);
 
         if (data.length === 0) {
           setError('Nenhuma pergunta encontrada.');
         } else {
           setQuestions(data);
+          setLoading(false);
           setEnemyLives(data.length);
+          console.log('total life', totalLife);
+          console.log('player life', playerLife);
         }
       } catch (err) {
-        setError('Erro ao carregar perguntas e respostas.');
-      } finally {
+        setError('Erro ao carregar perguntas');
         setLoading(false);
       }
     };
 
-    const fetchTopicData = async () => {
-      try {
-        const topicData = await fetchTopic(topic_id);
-        setTopic(topicData);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    fetchTopicData();
     loadQuestions();
   }, [topic_id]);
 
-  useEffect(() => {}, [topic_id]);
-
-  const handleAnswer = (selectedOption: string) => {
-    const question = questions[currentQuestionIndex];
-    const correctAnswer = question.answers.find((ans: any) => ans.is_correct);
-
-    if (selectedOption === correctAnswer.text) {
+  const handleAnswer = (isCorrect: boolean) => {
+    if (isCorrect) {
       setEnemyLives((prev) => Math.max(prev - 1, 0));
     } else {
       setPlayerLife((prev) => Math.max(prev - 1, 0));
     }
 
+    // Next question
     if (currentQuestionIndex < questions.length - 1) {
       setTimeout(() => {
         setCurrentQuestionIndex((prev) => prev + 1);
@@ -91,7 +82,7 @@ export default function Quiz() {
     }
   };
 
-  const renderLifeBar = (lives: number, totalLives: number) => {
+  const renderLifeBar = (lives: number, totalLives: number, flex: boolean) => {
     return (
       <View style={styles.lifeBar}>
         {Array.from({ length: totalLives }).map((_, index) => (
@@ -102,6 +93,7 @@ export default function Quiz() {
               index < lives ? styles.activeSegment : styles.inactiveSegment,
               index == 0 && styles.firstSegment,
               index == totalLives - 1 && styles.lastSegment,
+              flex && styles.flex,
             ]}
           />
         ))}
@@ -146,7 +138,7 @@ export default function Quiz() {
     >
       <View style={styles.lifeContainer}>
         <Text style={styles.lifeLabel}>{topic?.enemy.name}</Text>
-        {renderLifeBar(enemyLives, questions.length)}
+        {renderLifeBar(enemyLives, questions.length, false)}
         <TouchableOpacity
           style={styles.exitBtn}
           onPress={() => setModalVisible(true)}
@@ -168,7 +160,7 @@ export default function Quiz() {
           <TouchableOpacity
             key={index}
             style={styles.optionButton}
-            onPress={() => handleAnswer(option.text)}
+            onPress={() => handleAnswer(option.is_correct)}
           >
             <Text style={styles.optionText}>{option.text}</Text>
           </TouchableOpacity>
@@ -183,7 +175,7 @@ export default function Quiz() {
           style={styles.heartIcon}
         />
 
-        {renderLifeBar(playerLife, 5)}
+        {renderLifeBar(playerLife, totalLife, true)}
       </View>
 
       <Text style={styles.attributes}>
@@ -245,6 +237,7 @@ const styles = StyleSheet.create({
   },
   lifeBar: {
     flexDirection: 'row',
+    flex: 1,
   },
   lifeSegment: {
     width: 33,
@@ -265,6 +258,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: color.white,
     justifyContent: 'space-evenly',
+    paddingHorizontal: 10,
+    gap: 10,
     height: 65,
   },
   raceIcon: { width: 50, height: 50 },
@@ -367,4 +362,5 @@ const styles = StyleSheet.create({
     color: color.white,
     textAlign: 'center',
   },
+  flex: { flex: 1 },
 });
