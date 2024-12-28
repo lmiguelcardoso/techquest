@@ -1,8 +1,9 @@
 import { AntDesign, FontAwesome, MaterialIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useEffect, useState } from 'react';
 import {
+  BackHandler,
   Image,
   ImageBackground,
   ScrollView,
@@ -54,6 +55,25 @@ export default function Home() {
   const [totalStars, setTotalStars] = useState(0);
   const [dungeonStars, setDungeonStars] = useState<{ [key: string]: number }>(
     {}
+  );
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        if (currentDungeon != null) {
+          handleBackToList();
+        } else {
+          logout();
+        }
+        return true;
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () => {
+        BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+      };
+    }, [currentDungeon])
   );
 
   const logout = () => {
