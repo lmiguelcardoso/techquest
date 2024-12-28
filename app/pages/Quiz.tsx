@@ -33,6 +33,7 @@ export default function Quiz() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalVisible, setModalVisible] = useState(false);
+  const [isGameOverModalVisible, setIsGameOverModalVisible] = useState(false);
 
   const [enemyLives, setEnemyLives] = useState(0);
   const { race, attributes, playerLife, setPlayerLife, totalLife } =
@@ -71,17 +72,22 @@ export default function Quiz() {
     if (isCorrect) {
       setEnemyLives((prev) => Math.max(prev - 1, 0));
     } else {
-      setPlayerLife((prev) => Math.max(prev - 1, 0));
+      setPlayerLife((prev) => {
+        const newLife = Math.max(prev - 1, 0);
+        if (newLife === 0) {
+          setIsGameOverModalVisible(true);
+        }
+        return newLife;
+      });
     }
 
-    // Next question
-    if (currentQuestionIndex < questions.length - 1) {
+    // Only proceed to next question if player has lives remaining
+    if (playerLife > 1 && currentQuestionIndex < questions.length - 1) {
       setTimeout(() => {
         setCurrentQuestionIndex((prev) => prev + 1);
       }, 1000);
     }
   };
-
   const renderLifeBar = (lives: number, totalLives: number, flex: boolean) => {
     return (
       <View style={styles.lifeBar}>
@@ -195,7 +201,7 @@ export default function Quiz() {
           <View style={styles.modalView}>
             <AntDesign name="warning" size={76} color="white" />
             <Text style={styles.modalText}>
-              Se você sair irá perder todo o progresso dessa Quest{' '}
+              Se você sair irá perder todo o progresso dessa Quest
             </Text>
             <View style={styles.modalButtons}>
               <TouchableOpacity
@@ -212,6 +218,29 @@ export default function Quiz() {
                 }}
               >
                 <Text style={styles.textStyle}>Sair</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={isGameOverModalVisible}
+        transparent={true}
+        animationType="slide"
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalView}>
+            <AntDesign name="warning" size={76} color="white" />
+            <Text style={styles.modalText}>Você perdeu!</Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.button, styles.buttonConfirm]}
+                onPress={() => {
+                  navigation.goBack();
+                }}
+              >
+                <Text style={styles.textStyle}>Voltar para a tela incial</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -308,7 +337,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalView: {
     margin: 20,
