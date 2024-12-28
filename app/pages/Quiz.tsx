@@ -44,6 +44,7 @@ export default function Quiz() {
     useCharacter();
 
   const [topic, setTopic] = useState<any | null>(null);
+  const [correctAnswers, setCorrectAnswers] = useState(0);
 
   // Fetch Questions and Answers
   useEffect(() => {
@@ -97,12 +98,39 @@ export default function Quiz() {
     return true;
   };
 
-  const handleAnswer = (isCorrect: boolean) => {
+  const saveTopicProgress = async () => {
+    if (!character?.user_id || !topic_id) {
+      console.error('Missing user_id or topic_id');
+      return false;
+    }
+
+    const stars = Math.ceil((correctAnswers / questions.length) * 3);
+
+    const { error } = await supabase.from('topic_progress').upsert({
+      user_id: character.user_id,
+      topic_id: topic_id,
+      completed: true,
+      stars: stars,
+    });
+
+    if (error) {
+      console.error('Error saving topic progress:', error);
+      return false;
+    }
+    return true;
+  };
+
+  const handleAnswer = async (isCorrect: boolean) => {
     if (isCorrect) {
+      setCorrectAnswers((prev) => prev + 1);
       setEnemyLives((prev) => {
         const newLives = Math.max(prev - 1, 0);
         if (newLives === 0) {
-          setShowRewardModal(true);
+          saveTopicProgress().then((saved) => {
+            if (saved) {
+              setShowRewardModal(true);
+            }
+          });
         }
         return newLives;
       });

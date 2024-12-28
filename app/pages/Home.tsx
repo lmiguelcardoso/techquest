@@ -83,7 +83,7 @@ export default function Home() {
     });
 
     // Se nenhum tópico foi marcado como ativo, marque o primeiro tópico como ativo
-    if (!activeFound && updatedTopics.length > 0) {
+    if (!activeFound && updatedTopics.length > 0 && updatedTopics.length != 1) {
       updatedTopics[0].status = 'active';
     }
 
