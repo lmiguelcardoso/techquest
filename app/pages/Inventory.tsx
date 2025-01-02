@@ -1,5 +1,7 @@
 import { supabase } from '@/lib/supabase';
+import { AntDesign } from '@expo/vector-icons';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { useNavigation } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   FlatList,
@@ -9,11 +11,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import Navbar from '../components/Navbar';
 import { useCharacter } from '../context/CharacterContext';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import color from '../shared/color';
 import { EquippedItem } from '../shared/entities/equipped-item';
 import { Item } from '../shared/entities/item';
+import fontSize from '../shared/font-size';
 
 type NavigationProps = StackNavigationProp<RootStackParamList, 'Inventory'>;
 
@@ -56,7 +60,7 @@ export default function InventoryScreen() {
   const [selectedSlot, setSelectedSlot] = useState<ItemSlot>(ItemSlots[0]);
   const { race, character, equippedItems, equipItem, unequipItem } =
     useCharacter();
-
+  const navigator = useNavigation();
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -156,13 +160,18 @@ export default function InventoryScreen() {
       return attributes;
     }, baseAttributes);
   };
-
+  const returnToHome = () => {
+    navigator.goBack();
+  };
   const attributes = calculateAttributes();
 
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
         <Text style={styles.title}>Inventário</Text>
+        <TouchableOpacity style={styles.exitButton} onPress={returnToHome}>
+          <AntDesign name="close" size={30} color="black" />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.avatarContainer}>
@@ -171,17 +180,33 @@ export default function InventoryScreen() {
 
           <View style={styles.attributesContainer}>
             <Text style={styles.attributesTitle}>Atributos</Text>
-            <Text>Vida: {attributes.health}</Text>
-            <Text>Armadura: {attributes.armor}</Text>
-            <Text>Dano: {attributes.damage}</Text>
-            <Text>Força: {attributes.strength}</Text>
-            <Text>Sorte: {attributes.luck}</Text>
+            <View style={styles.attributeRow}>
+              <Text style={styles.attributesLabel}>Vida:</Text>
+              <Text style={styles.attributesValue}>{attributes.health}</Text>
+            </View>
+            <View style={styles.attributeRow}>
+              <Text style={styles.attributesLabel}>Armadura:</Text>
+              <Text style={styles.attributesValue}>{attributes.armor}</Text>
+            </View>
+            <View style={styles.attributeRow}>
+              <Text style={styles.attributesLabel}>Dano:</Text>
+              <Text style={styles.attributesValue}>{attributes.damage}</Text>
+            </View>
+            <View style={styles.attributeRow}>
+              <Text style={styles.attributesLabel}>Força:</Text>
+              <Text style={styles.attributesValue}>{attributes.strength}</Text>
+            </View>
+            <View style={styles.attributeRow}>
+              <Text style={styles.attributesLabel}>Sorte:</Text>
+              <Text style={styles.attributesValue}>{attributes.luck}</Text>
+            </View>
           </View>
         </View>
 
         <View style={styles.slots}>
-          <Text>{race?.name}</Text>
+          <Text style={styles.raceName}>{race?.name}</Text>
           <FlatList
+            style={styles.inventorySlots}
             data={ItemSlots}
             numColumns={2}
             keyExtractor={(item) => item.type}
@@ -237,33 +262,46 @@ export default function InventoryScreen() {
           )}
         />
       </View>
+      <Navbar />
     </View>
   );
 }
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#580068', padding: 16 },
+  container: { flex: 1, backgroundColor: '#580068', padding: 16, gap: 20 },
   avatarContainer: {
     alignItems: 'center',
     backgroundColor: color.white,
     borderWidth: 1,
     flexDirection: 'row',
     justifyContent: 'space-around',
+    borderRadius: 10,
   },
   titleContainer: {
     backgroundColor: color.white,
     alignContent: 'center',
+    borderRadius: 10,
   },
   title: {
     color: color.primary,
     textAlign: 'center',
+    fontSize: fontSize.primary,
+    fontWeight: 'bold',
   },
   avatarContainerSection1: {
     flexDirection: 'column',
-  },
-  avatar: { width: 100, height: 100, borderRadius: 50, marginBottom: 16 },
-  slots: {
-    justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  avatar: {
+    width: 150,
+    height: 150,
+    borderRadius: 20,
+    marginVertical: 16,
+    borderWidth: 1,
+  },
+  slots: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'flex-end', // Align to bottom
   },
   slot: {
     width: 50,
@@ -273,12 +311,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   slotImage: { width: '100%', height: '100%' },
-  attributesContainer: {
-    marginVertical: 16,
-    backgroundColor: color.primary,
-    width: 'auto',
-  },
-  attributesTitle: { fontSize: 18, fontWeight: 'bold', color: '#FFF' },
   inventoryContainer: { flex: 1 },
   inventoryTitle: {
     fontSize: 18,
@@ -305,4 +337,60 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   equipButtonText: { color: '#FFF', fontWeight: 'bold' },
+  attributesContainer: {
+    backgroundColor: color.primary, // Roxo como no fundo da imagem
+    borderRadius: 10,
+    padding: 10,
+    alignItems: 'center',
+    marginBottom: 10,
+    gap: 2,
+    width: 200, // Ajustar conforme necessário
+  },
+  attributesTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#FFFFFF', // Branco para contraste
+    marginBottom: 5,
+  },
+  attributesLabel: {
+    fontSize: 14,
+    flex: 5,
+    color: '#FFFFFF',
+    justifyContent: 'center',
+    marginBottom: 5,
+  },
+  attributesValue: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    flex: 3,
+    backgroundColor: '#FFFFFF',
+    textAlign: 'center',
+    borderTopRightRadius: 10,
+    borderBottomRightRadius: 10,
+  },
+  attributeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingLeft: 10,
+    marginVertical: 2,
+    borderWidth: 1,
+    borderColor: color.white,
+    borderRadius: 10,
+  },
+  inventorySlots: {
+    width: '100%',
+    marginTop: '25%',
+  },
+  raceName: {
+    fontSize: 34,
+    fontWeight: 'bold',
+    color: color.primary,
+    marginTop: 20,
+  },
+  exitButton: {
+    position: 'absolute',
+    right: 10,
+    top: 10,
+  },
 });
