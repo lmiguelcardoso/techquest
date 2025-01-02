@@ -215,10 +215,17 @@ export default function Home() {
                 onPress={() => handleDungeonSelect(dungeon.id)}
                 style={styles.dungeonItem}
               >
-                <Text style={styles.dungeonName}>
-                  {index + 1}- {dungeon.name} - {dungeonStars[dungeon.id] || 0}{' '}
-                  estrelas
-                </Text>
+                <View style={styles.dungeonBtn}>
+                  <View style={styles.dungeonBtnTitle}>
+                    <Text style={styles.dungeonName}>
+                      0{index + 1}- {dungeon.name}
+                    </Text>
+                  </View>
+                  <Text style={styles.dungeonBtnStars}>
+                    {dungeonStars[dungeon.id] || 0}
+                    /6
+                  </Text>
+                </View>
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -367,15 +374,36 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   dungeonItem: {
-    backgroundColor: '#FFF',
-    padding: 10,
+    backgroundColor: 'transparent',
+    borderColor: color.white,
+    borderWidth: 1,
     marginVertical: 5,
     borderRadius: 8,
     width: '90%',
   },
   dungeonName: {
     fontSize: 18,
-    textAlign: 'justify',
+    textAlign: 'auto',
+    paddingLeft: 20,
+    color: color.white,
+  },
+  dungeonBtn: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  dungeonBtnTitle: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  dungeonBtnStars: {
+    backgroundColor: color.white,
+    fontSize: 20,
+    paddingHorizontal: 50,
+    paddingVertical: 15,
+    borderTopRightRadius: 7,
+    borderBottomRightRadius: 7,
     color: color.primary,
+    fontWeight: 'bold',
   },
 });
