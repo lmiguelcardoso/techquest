@@ -227,8 +227,22 @@ export default function Home() {
 
         <View style={styles.dungeonDetailContainer}>
           <Text style={styles.battleText}>
-            {isDungeonListVisible ? 'ESTRELAS' : 'Batalha 03/10'}
+            {isDungeonListVisible ? (
+              'ESTRELAS'
+            ) : (
+              <>
+                <Text>Quest </Text>
+                {String(
+                  dungeonProgress[currentDungeon!.id]?.current || 0
+                ).padStart(2, '0')}
+                /
+                {String(
+                  dungeonProgress[currentDungeon!.id]?.total || 0
+                ).padStart(2, '0')}
+              </>
+            )}
           </Text>
+
           <View style={styles.starContainer}>
             <Text style={styles.starCount}>{totalStars} / 6</Text>
             <FontAwesome name="star" size={50} color="yellow" />
@@ -249,12 +263,18 @@ export default function Home() {
                 <View style={styles.dungeonBtn}>
                   <View style={styles.dungeonBtnTitle}>
                     <Text style={styles.dungeonName}>
-                      0{index + 1}- {dungeon.name}
+                      {String(index + 1).padStart(2, '0')}- {dungeon.name}
                     </Text>
                   </View>
                   <Text style={styles.dungeonBtnStars}>
-                    {dungeonProgress[dungeon.id]?.current || 0}/
-                    {dungeonProgress[dungeon.id]?.total || 0}
+                    {String(
+                      dungeonProgress[dungeon!.id]?.current || 0
+                    ).padStart(2, '0')}
+                    /
+                    {String(dungeonProgress[dungeon!.id]?.total || 0).padStart(
+                      2,
+                      '0'
+                    )}
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -427,7 +447,7 @@ const styles = StyleSheet.create({
   dungeonBtnStars: {
     backgroundColor: color.white,
     fontSize: 20,
-    paddingHorizontal: 50,
+    paddingHorizontal: 30,
     paddingVertical: 15,
     borderTopRightRadius: 7,
     borderBottomRightRadius: 7,
