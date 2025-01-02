@@ -1,6 +1,7 @@
 import { AntDesign } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import {
+  Alert,
   Image,
   ImageBackground,
   StyleSheet,
@@ -32,6 +33,11 @@ export default function Onboarding() {
   };
 
   const handleConfirmSelection = async () => {
+    if (selectedRace?.race_id != 2) {
+      Alert.alert('Erro', 'Raça não possui conteudo cadastrado');
+      return;
+    }
+
     try {
       if (selectedRace && races != null) {
         const race = races.find((r) => r.name === selectedRace.name)!;
