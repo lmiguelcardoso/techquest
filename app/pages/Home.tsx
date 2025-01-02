@@ -56,6 +56,9 @@ export default function Home() {
   const [dungeonStars, setDungeonStars] = useState<{ [key: string]: number }>(
     {}
   );
+  const [dungeonProgress, setDungeonProgress] = useState<{
+    [key: string]: { current: number; total: number };
+  }>({});
 
   useFocusEffect(
     React.useCallback(() => {
@@ -141,11 +144,38 @@ export default function Home() {
 
   useEffect(() => {
     const fetchAllDungeons = async () => {
-      const dungeons = await getDungeonsByRace(character!.race_id);
-      setAllDungeons(dungeons);
+      if (character) {
+        const dungeons = await getDungeonsByRace(character.race_id);
+        setAllDungeons(dungeons);
+
+        // Load topics for each dungeon
+        for (const dungeon of dungeons) {
+          const topics = await getTopicsByDungeonID(dungeon.id, userData!.id);
+
+          let currentTopicIndex = 0;
+          let activeFound = false;
+
+          topics.forEach((topic, index) => {
+            if (topic.completed) {
+              currentTopicIndex = index + 1;
+            } else if (!activeFound) {
+              activeFound = true;
+              currentTopicIndex = index + 1;
+            }
+          });
+
+          setDungeonProgress((prev) => ({
+            ...prev,
+            [dungeon.id]: {
+              current: currentTopicIndex,
+              total: topics.length,
+            },
+          }));
+        }
+      }
     };
     fetchAllDungeons();
-  }, [character]);
+  }, [character, userData]);
 
   useEffect(() => {
     const fetchStars = async () => {
@@ -196,11 +226,12 @@ export default function Home() {
         </View>
 
         <View style={styles.dungeonDetailContainer}>
-          <Text style={styles.battleText}>Batalha 03/10</Text>
+          <Text style={styles.battleText}>
+            {isDungeonListVisible ? 'ESTRELAS' : 'Batalha 03/10'}
+          </Text>
           <View style={styles.starContainer}>
-            <Text style={styles.starText}>Estrelas</Text>
-            <FontAwesome name="star" size={24} color="yellow" />
-            <Text style={styles.starCount}>{totalStars} / 30</Text>
+            <Text style={styles.starCount}>{totalStars} / 6</Text>
+            <FontAwesome name="star" size={50} color="yellow" />
           </View>
         </View>
       </View>
@@ -222,8 +253,8 @@ export default function Home() {
                     </Text>
                   </View>
                   <Text style={styles.dungeonBtnStars}>
-                    {dungeonStars[dungeon.id] || 0}
-                    /6
+                    {dungeonProgress[dungeon.id]?.current || 0}/
+                    {dungeonProgress[dungeon.id]?.total || 0}
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -314,14 +345,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 5,
   },
-  starText: {
-    fontSize: 16,
-    marginRight: 5,
-    color: '#4A0C5C',
-  },
   starCount: {
-    fontSize: 16,
+    fontSize: fontSize.primary,
+    fontWeight: 'bold',
     marginLeft: 5,
+    marginRight: 20,
     color: '#4A0C5C',
   },
   battlePath: {
