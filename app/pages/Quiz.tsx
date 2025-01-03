@@ -46,6 +46,7 @@ export default function Quiz() {
   const [topic, setTopic] = useState<any | null>(null);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [errorCount, setErrorCount] = useState(0);
+  const [playerArmor, setPlayerArmor] = useState(attributes.armor);
 
   // Fetch Questions and Answers
   useEffect(() => {
@@ -143,13 +144,18 @@ export default function Quiz() {
       });
     } else {
       setErrorCount((prev) => prev + 1);
-      setPlayerLife((prev) => {
-        const newLife = Math.max(prev - 1, 0);
-        if (newLife === 0) {
-          setIsGameOverModalVisible(true);
-        }
-        return newLife;
-      });
+      // Handle armor first, then life
+      if (playerArmor > 0) {
+        setPlayerArmor((prev) => Math.max(prev - 1, 0));
+      } else {
+        setPlayerLife((prev) => {
+          const newLife = Math.max(prev - 1, 0);
+          if (newLife === 0) {
+            setIsGameOverModalVisible(true);
+          }
+          return newLife;
+        });
+      }
     }
 
     if (playerLife > 1 && currentQuestionIndex < questions.length - 1) {
@@ -170,21 +176,45 @@ export default function Quiz() {
     }
   };
 
-  const renderLifeBar = (lives: number, totalLives: number, flex: boolean) => {
+  const renderLifeBar = (
+    lives: number,
+    totalLives: number,
+    isPlayer: boolean
+  ) => {
     return (
       <View style={styles.lifeBar}>
-        {Array.from({ length: totalLives }).map((_, index) => (
-          <View
-            key={index}
-            style={[
-              styles.lifeSegment,
-              index < lives ? styles.activeSegment : styles.inactiveSegment,
-              index == 0 && styles.firstSegment,
-              index == totalLives - 1 && styles.lastSegment,
-              flex && styles.flex,
-            ]}
-          />
-        ))}
+        {Array.from({ length: totalLives }).map((_, index) => {
+          let segmentStyle;
+
+          if (isPlayer) {
+            if (index < playerArmor) {
+              // Show armor segments in blue
+              segmentStyle = styles.armorSegment;
+            } else if (index < lives) {
+              // Show remaining health in red
+              segmentStyle = styles.activeSegment;
+            } else {
+              // Show inactive segments in gray
+              segmentStyle = styles.inactiveSegment;
+            }
+          } else {
+            // Enemy life bar remains unchanged
+            segmentStyle =
+              index < lives ? styles.activeSegment : styles.inactiveSegment;
+          }
+
+          return (
+            <View
+              key={index}
+              style={[
+                styles.lifeSegment,
+                segmentStyle,
+                index === 0 && styles.firstSegment,
+                index === totalLives - 1 && styles.lastSegment,
+              ]}
+            />
+          );
+        })}
       </View>
     );
   };
@@ -507,7 +537,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 22,
   },
-  flex: { flex: 1 },
   rewardContainer: {
     alignItems: 'center',
     marginVertical: 20,
@@ -521,5 +550,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: color.white,
     fontWeight: 'bold',
+  },
+  armorSegment: {
+    backgroundColor: '#4169E1', // Steel blue color for armor
   },
 });
