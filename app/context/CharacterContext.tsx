@@ -42,7 +42,7 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     strength: 0,
     luck: 0,
   });
-  const [playerLife, setPlayerLife] = useState(5);
+  const [playerLife, setPlayerLife] = useState(6);
   const { userData } = useAuth();
 
   const fetchCharacter = async () => {
@@ -179,10 +179,10 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
   }, [character]);
 
   useEffect(() => {
-    setPlayerLife(5 + attributes.health);
+    setPlayerLife(6 + attributes.health);
   }, [attributes]);
 
-  const totalLife = 5 + attributes.health; // Base life + health attribute
+  const totalLife = 6 + attributes.health; // Base life + health attribute
 
   return (
     <CharacterContext.Provider

@@ -47,6 +47,11 @@ export default function Quiz() {
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [errorCount, setErrorCount] = useState(0);
   const [playerArmor, setPlayerArmor] = useState(attributes.armor);
+  const [consecutiveCorrectAnswers, setConsecutiveCorrectAnswers] = useState(0);
+  const targetCorrectAnswers = Math.max(
+    questions.length - attributes.damage,
+    1
+  );
 
   // Fetch Questions and Answers
   useEffect(() => {
@@ -130,19 +135,21 @@ export default function Quiz() {
 
   const handleAnswer = async (isCorrect: boolean) => {
     if (isCorrect) {
-      setCorrectAnswers((prev) => prev + 1);
-      setEnemyLives((prev) => {
-        const newLives = Math.max(prev - 1, 0);
-        if (newLives === 0) {
+      setConsecutiveCorrectAnswers((prev) => {
+        const newCount = prev + 1;
+        // Check if reached target based on damage
+        if (newCount >= targetCorrectAnswers) {
           saveTopicProgress().then((saved) => {
             if (saved) {
               setShowRewardModal(true);
             }
           });
         }
-        return newLives;
+        return newCount;
       });
+      setEnemyLives((prev) => Math.max(prev - 1, 0));
     } else {
+      setConsecutiveCorrectAnswers(0); // Reset on wrong answer
       setErrorCount((prev) => prev + 1);
       // Handle armor first, then life
       if (playerArmor > 0) {
@@ -419,10 +426,11 @@ const styles = StyleSheet.create({
   lifeBar: {
     flexDirection: 'row',
     flex: 1,
+    justifyContent: 'center',
   },
   lifeSegment: {
-    width: 33,
-    height: 20,
+    width: 35,
+    height: 15,
     borderColor: color.white,
     borderWidth: 2,
     borderRadius: 4,
@@ -444,8 +452,7 @@ const styles = StyleSheet.create({
     height: 65,
   },
   raceIcon: { width: 50, height: 50 },
-  heartIcon: { width: 25, height: 25 },
-
+  heartIcon: { width: 35, height: 25, marginLeft: 20 },
   firstSegment: {
     borderBottomLeftRadius: 20,
     borderTopLeftRadius: 20,
@@ -483,7 +490,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   errorText: { color: 'red', fontSize: 16 },
-  enemyImage: { width: 'auto', height: 300, borderRadius: 20 },
+  enemyImage: {
+    width: 'auto',
+    height: 300,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: color.white,
+  },
   exitBtn: { position: 'absolute', top: 0, right: 0 },
   modalContainer: {
     flex: 1,
