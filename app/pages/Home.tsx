@@ -35,7 +35,7 @@ type NavigationProps = StackNavigationProp<RootStackParamList, 'Home'>;
 
 const BATTLE_POSITIONS = [
   { top: 450 },
-  { top: 350 },
+  { top: 325 },
   { top: 255, left: 255 },
   { top: 150 },
   { top: 25 },
@@ -91,6 +91,13 @@ export default function Home() {
 
   const loadTopics = async (dungeonId: string) => {
     const topics = await getTopicsByDungeonID(dungeonId, userData!.id);
+    let allCompleted = true;
+
+    topics.forEach((topic) => {
+      if (!topic.completed) {
+        allCompleted = false;
+      }
+    });
 
     // Define o status dos tópicos
     let activeFound = false;
@@ -106,7 +113,7 @@ export default function Home() {
     });
 
     // Se nenhum tópico foi marcado como ativo, marque o primeiro tópico como ativo
-    if (!activeFound && updatedTopics.length > 0 && updatedTopics.length != 1) {
+    if (!activeFound && updatedTopics.length > 1 && !allCompleted) {
       updatedTopics[0].status = 'active';
     }
 
@@ -301,7 +308,7 @@ export default function Home() {
                     styles.battleIconContainer,
                     BATTLE_POSITIONS[index],
                     topic.completed && {
-                      top: BATTLE_POSITIONS[index].top - 24,
+                      top: BATTLE_POSITIONS[index].top + 24,
                     },
                   ]}
                   key={topic.id}
