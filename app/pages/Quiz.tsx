@@ -45,6 +45,7 @@ export default function Quiz() {
 
   const [topic, setTopic] = useState<any | null>(null);
   const [correctAnswers, setCorrectAnswers] = useState(0);
+  const [errorCount, setErrorCount] = useState(0);
 
   // Fetch Questions and Answers
   useEffect(() => {
@@ -104,7 +105,13 @@ export default function Quiz() {
       return false;
     }
 
-    const stars = Math.ceil((correctAnswers / questions.length) * 3);
+    // Calculate stars based on error count
+    let stars = 3;
+    if (errorCount === 1) {
+      stars = 2;
+    } else if (errorCount > 1) {
+      stars = 1;
+    }
 
     const { error } = await supabase.from('topic_progress').upsert({
       user_id: character.user_id,
@@ -135,6 +142,7 @@ export default function Quiz() {
         return newLives;
       });
     } else {
+      setErrorCount((prev) => prev + 1);
       setPlayerLife((prev) => {
         const newLife = Math.max(prev - 1, 0);
         if (newLife === 0) {
@@ -258,11 +266,6 @@ export default function Quiz() {
         {renderLifeBar(playerLife, totalLife, true)}
       </View>
 
-      <Text style={styles.attributes}>
-        Attributes: {attributes.damage} {attributes.armor} {attributes.luck}{' '}
-        {attributes.armor}
-      </Text>
-
       <Modal
         animationType="slide"
         transparent={true}
@@ -337,7 +340,7 @@ export default function Quiz() {
               {!isChestOpened ? (
                 <MaterialCommunityIcons
                   name="treasure-chest"
-                  size={24}
+                  size={60}
                   color="black"
                 />
               ) : (
@@ -376,6 +379,7 @@ const styles = StyleSheet.create({
   },
   lifeContainer: {
     alignItems: 'center',
+    marginBottom: 15,
   },
   lifeLabel: {
     fontSize: 18,
@@ -502,12 +506,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     fontSize: 22,
-  },
-  attributes: {
-    fontSize: 16,
-    marginTop: 10,
-    color: color.white,
-    textAlign: 'center',
   },
   flex: { flex: 1 },
   rewardContainer: {
