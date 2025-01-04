@@ -53,6 +53,20 @@ export default function Onboarding() {
   const [showWalkthrough, setShowWalkthrough] = useState(true);
   const fadeAnim = useRef(new Animated.Value(1)).current;
 
+  const checkWalkthrough = async () => {
+    try {
+      const hasCompletedWalkthrough = await AsyncStorage.getItem(
+        'walkthroughCompleted'
+      );
+      if (hasCompletedWalkthrough === 'true') {
+        setShowWalkthrough(false);
+      }
+    } catch (error) {
+      console.error('Error checking walkthrough status:', error);
+      setShowWalkthrough(true);
+    }
+  };
+
   const handleSelectRace = (race: Race) => {
     setSelectedRace(race);
     setIsImageLoaded(false);
@@ -133,6 +147,7 @@ export default function Onboarding() {
   };
 
   useEffect(() => {
+    checkWalkthrough();
     loadRaces();
   }, []);
 
