@@ -1,7 +1,9 @@
 import { AntDesign } from '@expo/vector-icons';
-import React, { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Alert,
+  Animated,
   Image,
   ImageBackground,
   StyleSheet,
@@ -21,11 +23,35 @@ import {
   getRaces,
 } from '../shared/services/RequestService';
 
+const slides = [
+  {
+    id: 1,
+    title: 'Impulsione seus estudos em tecnologia!',
+    description:
+      'De forma descomplicada evolua seus conhecimentos por meio de Quests desafiadoras.',
+  },
+  {
+    id: 2,
+    title: 'Evolua seu Personagem!',
+    description:
+      'Conforme avança na sua jornada de aprendizado ganhe itens derrotando monstros perigosos.',
+  },
+  {
+    id: 3,
+    title: 'Diferentes trilhas de Aprendizado!',
+    description:
+      'Altere entre classes de personagens de acordo com o seu objetivo de aprendizado.',
+  },
+];
+
 export default function Onboarding() {
   const [selectedRace, setSelectedRace] = useState<Race | null>(null);
   const { userData, setIsFirstAccess } = useAuth();
   const [races, setRaces] = useState<Race[] | null>(null);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [showWalkthrough, setShowWalkthrough] = useState(true);
+  const fadeAnim = useRef(new Animated.Value(1)).current;
 
   const handleSelectRace = (race: Race) => {
     setSelectedRace(race);
@@ -64,9 +90,101 @@ export default function Onboarding() {
     setSelectedRace(null);
   };
 
+  const fadeOut = () => {
+    Animated.timing(fadeAnim, {
+      toValue: 0,
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const fadeIn = () => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handleNext = () => {
+    if (currentIndex < slides.length - 1) {
+      fadeOut();
+      setTimeout(() => {
+        setCurrentIndex((prev) => prev + 1);
+        fadeIn();
+      }, 500);
+    } else {
+      handleComplete();
+    }
+  };
+
+  const handlePrevious = async () => {
+    if (currentIndex > 0) {
+      fadeOut();
+      setTimeout(() => {
+        setCurrentIndex((prev) => prev - 1);
+        fadeIn();
+      }, 500);
+    }
+  };
+  const handleComplete = async () => {
+    await AsyncStorage.setItem('walkthroughCompleted', 'true');
+    setShowWalkthrough(false);
+  };
+
   useEffect(() => {
     loadRaces();
   }, []);
+
+  if (showWalkthrough) {
+    return (
+      <Background>
+        <View style={styles.welcomeContainer}>
+          <Text style={{ ...styles.welcomeText }}>Bem vindo!</Text>
+          <View style={styles.centralizeImg}>
+            <Image source={require('../../assets/images/icon.png')} />
+          </View>
+        </View>
+
+        <Animated.View style={[styles.slideContainer, { opacity: fadeAnim }]}>
+          <Text style={styles.walkthroughTitle}>
+            {slides[currentIndex].title}
+          </Text>
+          <Text style={styles.walkthroughDescription}>
+            {slides[currentIndex].description}
+          </Text>
+
+          <View style={styles.pagination}>
+            {slides.map((_, index) => (
+              <View
+                key={index}
+                style={[styles.dot, currentIndex === index && styles.activeDot]}
+              />
+            ))}
+          </View>
+        </Animated.View>
+
+        <View
+          style={[
+            styles.buttonContainerWalkthough,
+            currentIndex == 0 && styles.justifyEnd,
+          ]}
+        >
+          {currentIndex > 0 && (
+            <TouchableOpacity style={styles.button} onPress={handlePrevious}>
+              <Text style={styles.buttonText}>Anterior</Text>
+            </TouchableOpacity>
+          )}
+
+          <TouchableOpacity style={styles.button} onPress={handleNext}>
+            <Text style={styles.buttonText}>
+              {currentIndex === slides.length - 1 ? 'Começar' : 'Próximo'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </Background>
+    );
+  }
 
   if (!races) {
     return (
@@ -271,5 +389,79 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     alignContent: 'center',
+  },
+
+  slideContainer: {
+    width: '100%',
+    height: '40%',
+    padding: 20,
+    backgroundColor: '#580068',
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  centralizeImg: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  welcomeContainer: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  welcomeText: {
+    fontSize: 32,
+    color: color.white,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  pagination: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginVertical: 20,
+  },
+  dot: {
+    width: 50,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    marginHorizontal: 5,
+  },
+  activeDot: {
+    backgroundColor: color.white,
+  },
+  buttonContainerWalkthough: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginTop: 40,
+    marginBottom: 20,
+  },
+  justifyEnd: {
+    justifyContent: 'flex-end',
+  },
+  button: {
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: color.white,
+    backgroundColor: '#580068',
+  },
+  buttonText: {
+    color: color.white,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  walkthroughTitle: {
+    fontSize: 24,
+    textAlign: 'center',
+    color: color.white,
+    fontWeight: 'bold',
+  },
+  walkthroughDescription: {
+    fontSize: 18,
+    textAlign: 'center',
+    color: color.white,
+    fontWeight: 'normal',
   },
 });

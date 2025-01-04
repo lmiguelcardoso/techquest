@@ -43,16 +43,6 @@ export default function Login({ navigation }: Props) {
       '8990435403-feukvau6njeahl8s4tp5ovepjlr3plmh.apps.googleusercontent.com',
   });
 
-  // useEffect(() => {
-  //   const handleRedirect = (event: any) => {
-  //     const { path, queryParams } = Linking.parse(event.url);
-  //     console.log('Redirect data:', path, queryParams);
-  //   };
-
-  //   const subscription = Linking.addEventListener('url', handleRedirect);
-  //   return () => subscription.remove();
-  // }, []);
-
   const handleSignInWithGoogle = async () => {
     try {
       await GoogleSignin.hasPlayServices();
@@ -69,6 +59,7 @@ export default function Login({ navigation }: Props) {
           Alert.alert('Erro no login', error.message);
         } else {
           handleLogin(data.user, data.session);
+          navigation.navigate('Onboarding');
           Alert.alert('Sucesso', 'Login com Google realizado com sucesso!');
         }
       } else {
