@@ -24,11 +24,9 @@
         <action android:name="android.intent.action.VIEW"/>
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
-        <data android:scheme="myapp"/>
-        <data android:scheme="com.lmiguelcardoso.TechQuest"/>
+        <data android:scheme="com.lmiguelcardoso.techquest"/>
+        <data android:scheme="com.lmiguelcardoso.techquest"/>
         <data android:scheme="exp+techquest"/>
-        <data android:scheme="com.lmiguelcardoso.techquest"/>
-        <data android:scheme="com.lmiguelcardoso.techquest"/>
       </intent-filter>
     </activity>
   </application>

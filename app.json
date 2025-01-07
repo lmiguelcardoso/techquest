@@ -4,17 +4,18 @@
     "slug": "TechQuest",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/favicon.png",
     "scheme": "com.lmiguelcardoso.techquest",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.lmiguelcardoso.techquest"
+      "bundleIdentifier": "com.lmiguelcardoso.techquest",
+      "icon": "./assets/images/favicon.png"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/favicon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.lmiguelcardoso.techquest"
