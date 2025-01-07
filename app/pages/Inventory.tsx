@@ -38,9 +38,9 @@ const ItemSlots = [
     icon: require('../../assets/images/inventory/chest.png'),
   },
   {
-    name: 'Luva',
-    type: 'hands',
-    icon: require('../../assets/images/inventory/hand.png'),
+    name: 'Arma',
+    type: 'weapon',
+    icon: require('../../assets/images/inventory/sword.png'),
   },
   {
     name: 'Calça',
