@@ -1,50 +1,95 @@
-# Welcome to your Expo app 👋
+# TechQuest Application
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Tech Quest is an application whose difference is established through the gamification of the content presented with RPG concepts, where each mission includes important technological concepts for learning, such as programming logic and software development. The application is built using the back-end process as a managed service and takes advantage of the use of JavaScript and TypeScript languages. Furthermore, this work presents the application's trajectory in detail, explaining the origin of its idea, how it was refined and put into practical testing. The research offers a relevant contribution to the development of assistive technologies in the student world and seeks to benefit all those seeking new knowledge in the technological world.
 
-## Get started
+## Features
 
-1. Install dependencies
+- Authentication using Google
 
-   ```bash
-   npm install
-   ```
+- Authentication using GitHub
 
-2. Start the app
+- User registration and login with email/password
 
-   ```bash
-    npx expo start
-   ```
+- Gamified onboarding with character selection
 
-In the output, you'll find options to open the app in a
+- Dynamic quizzes with immediate feedback
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- Inventory management with RPG-style items
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- Dungeon system with progressive difficulty quests
 
-## Get a fresh project
+- Experience points and level progression system
 
-When you're ready, run:
+## Layout
+
+<img src="repo/main.png" alt="app-image" width="200"/>
+<img src="repo/register.png" alt="app-image" width="200"/>
+<img src="repo/login.png" alt="app-image" width="200"/>
+<br>
+<img src="repo/onboarding1.png" alt="app-image" width="200"/>
+<img src="repo/onboarding2.png" alt="app-image" width="200"/>
+<img src="repo/onboarding3.png" alt="app-image" width="200"/>
+<br>
+<img src="repo/orc.png" alt="app-image" width="200"/>
+<img src="repo/elf.png" alt="app-image" width="200"/>
+<img src="repo/dwarf.png" alt="app-image" width="200"/>
+<img src="repo/fairy.png" alt="app-image" width="200"/>
+<br>
+<img src="repo/home.png" alt="app-image" width="200"/>
+<img src="repo/dungeon.png" alt="app-image" width="200"/>
+<img src="repo/inventory.png" alt="app-image" width="200"/>
+<br>
+<img src="repo/quiz.png" alt="app-image" width="200"/>
+<img src="repo/modal.png" alt="app-image" width="200"/>
+
+## DB Diagram && Application Architecture
+
+_DB Diagram_
+
+![DB Diagrams](repo/techquest-db-diagram.jpg)
+
+_Application Architecture_
+
+![Class Diagrams](repo/techquest-architecture.jpg)
+
+## Technologies
+
+### Back-end
+
+- Supabase
+
+### Front-end
+
+- React Native
+- Expo
+
+## Build and Execute
+
+### Prerequisites
+
+- Node
+- Android Studio
+
+### Clone the Repository
 
 ```bash
-npm run reset-project
+git clone https://github.com/lmiguelcardoso/TechQuest
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Install Dependencies
 
-## Learn more
+```bash
+npm install
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+### Start the Development Server
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npm run android
+```
 
-## Join the community
+Or
 
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```bash
+npx expo start
+```
