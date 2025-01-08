@@ -107,7 +107,6 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
     };
 
     items.forEach((item) => {
-      console.log('Processing item:', item);
       const bonuses = JSON.parse(item.items?.bonus) as Attributes;
       Object.keys(bonuses).forEach((key) => {
         newAttributes[key as keyof Attributes] += Number(
@@ -126,7 +125,6 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
         .from('equipped_items')
         .insert({
           item_id: itemId,
-          type: slot,
           character_id: character?.id,
         })
         .select('*, items ( id, name, type, bonus, icon )');
@@ -139,7 +137,7 @@ export const CharacterProvider = ({ children }: { children: ReactNode }) => {
       if (newEquip) {
         setEquippedItems((prev) => {
           const updatedItems = prev
-            .filter((item) => item.type !== slot)
+            .filter((item) => item.items!.type !== slot)
             .concat(newEquip[0]);
           calculateAttributes(updatedItems);
           return updatedItems;

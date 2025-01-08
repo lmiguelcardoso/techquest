@@ -117,7 +117,7 @@ export default function InventoryScreen() {
           description: equippedItem.items?.description || '',
           bonus: equippedItem.items?.bonus || '',
           icon: equippedItem.items?.icon || '',
-          type: equippedItem.type,
+          type: equippedItem.items!.type,
         },
       ]);
     } catch (err) {
@@ -212,7 +212,7 @@ export default function InventoryScreen() {
             keyExtractor={(item) => item.type}
             renderItem={({ item, index }) => {
               const equippedItem = equippedItems.find(
-                (equipped) => equipped.type === item.type
+                (equipped) => equipped.items!.type === item.type
               );
               return (
                 <TouchableOpacity
